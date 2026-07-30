@@ -225,7 +225,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 20
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -451,8 +451,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerDefinition: {fileID: 11400000, guid: 05d03330870e496408b8a05f2572b14a, type: 2}
+  _swordPrefab: {fileID: 6654344984250036309, guid: e8178e4a4741f9a4d8c3b5c51c174726, type: 3}
   _spawnMapView: {fileID: 1656696042}
   _spawnSeed: 12345
+  _swordPrewarm: 48
 --- !u!4 &1853262275
 Transform:
   m_ObjectHideFlags: 0

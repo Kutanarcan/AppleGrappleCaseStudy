@@ -8,14 +8,21 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [Header("Definitions")]
         [SerializeField] private CharacterDefinition _playerDefinition;
 
+        [Header("Prefabs")]
+        [SerializeField] private SwordView _swordPrefab;
+
         [Header("Scene")]
         [SerializeField] private SpawnMapView _spawnMapView;
         [SerializeField] private int _spawnSeed = 12345;
+
+        [Header("Pooling")]
+        [SerializeField] private int _swordPrewarm = 48;
 
         private PlayerInput       _input;
         private SpawnMap          _map;
         private CharacterRegistry _characters;
         private CharacterFactory  _factory;
+        private Pool<Sword>       _swordPool;
 
         private void Awake()
         {
@@ -43,7 +50,20 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _input      = new PlayerInput();
             _map        = new SpawnMap(_spawnMapView, _spawnSeed);
             _characters = new CharacterRegistry();
-            _factory    = new CharacterFactory(_characters, _map, _input, _playerDefinition);
+
+            _swordPool = new Pool<Sword>(
+                create:  CreateSword,
+                destroy: sword => Destroy(sword.View.gameObject),
+                prewarm: _swordPrewarm);
+
+            _factory    = new CharacterFactory(_characters, _map, _input, _swordPool, _playerDefinition);
+        }
+
+        private Sword CreateSword()
+        {
+            SwordView view = Instantiate(_swordPrefab);
+            view.gameObject.SetActive(false);
+            return new Sword(view);
         }
 
         // ================= INITIALIZE =================
@@ -64,13 +84,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         // ================= DISPOSE =================
         private void Dispose()
         {
+            // Dispose order matters: the factory returns swords to the pool first,
+            // then the pool destroys them.
             _factory?.Dispose();
+            _swordPool?.Dispose();
 
             _input?.Disable();
             _input?.Dispose();
 
             _input      = null;
             _factory    = null;
+            _swordPool  = null;
             _characters = null;
             _map        = null;
         }

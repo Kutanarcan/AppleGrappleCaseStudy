@@ -14,7 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ViewPrefab: {fileID: 2193605570509476394, guid: 936707d04b68b6c49b82f4b215613f4c, type: 3}
   BrainType: 0
+  HasSwordRing: 1
   MoveSpeed: 7.5
   Acceleration: 100
   Deceleration: 350
   MaxHealth: 100
+  SwordCount: 30
+  MaxSwordCount: 36
+  OrbitRadius: 2.25
+  OrbitAngularSpeed: 150
+  SwordDamage: 34
+  NeutralizeDuration: 1.5

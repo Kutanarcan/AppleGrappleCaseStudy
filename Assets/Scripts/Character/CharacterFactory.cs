@@ -8,17 +8,20 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private readonly CharacterRegistry _registry;
         private readonly SpawnMap          _map;
         private readonly PlayerInput       _input;
+        private readonly Pool<Sword>       _swordPool;
 
         private Character _player;
 
         // ================= CREATE =================
         // The roster is born here. After this no character is ever Instantiated.
         public CharacterFactory(CharacterRegistry registry, SpawnMap map,
-                                PlayerInput input, CharacterDefinition playerDefinition)
+                                PlayerInput input, Pool<Sword> swordPool,
+                                CharacterDefinition playerDefinition)
         {
-            _registry = registry;
-            _map      = map;
-            _input    = input;
+            _registry  = registry;
+            _map       = map;
+            _input     = input;
+            _swordPool = swordPool;
 
             _player = CreateCharacter(playerDefinition);
         }
@@ -31,6 +34,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             // The provider may reference the character → character first, then provider
             character.SetDirectionProvider(CreateProvider(definition, character));
+
+            if (definition.HasSwordRing)
+                character.AddAbility(new SwordRingAbility(_swordPool));
 
             return character;
         }
