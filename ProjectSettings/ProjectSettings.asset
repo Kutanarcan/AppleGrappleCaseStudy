@@ -769,7 +769,8 @@ PlayerSettings:
   webGLWebAssemblyBigInt: 0
   webGLCloseOnQuit: 0
   webWasm2023: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Standalone: SCRATCHCARD_DEBUG
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
@@ -868,11 +869,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 
+  cloudProjectId: 5e748476-b291-483a-85b2-ce5f23441704
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: AppleGrappleCaseStudy
+  organizationId: kutanarcanakgul
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
