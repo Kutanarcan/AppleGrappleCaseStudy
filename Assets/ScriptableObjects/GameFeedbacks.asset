@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 722b79ca6d307d545bf24b07e88402b6, type: 3}
+  m_Name: GameFeedbacks
+  m_EditorClassIdentifier: 
+  SwordClashClip: {fileID: 8300000, guid: ef975c3eede80c946bb197a90de03036, type: 3}
+  CollectClip: {fileID: 8300000, guid: 3242f9d8c5da48b44bb7163880ef731e, type: 3}
+  SwordClashVolume: 0.8
+  CollectVolume: 0.7
+  BloodSplashPrefab: {fileID: 8475062431297631939, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+  SwordClashPrefab: {fileID: 2706428166564598739, guid: 83036083a4ebcd34f98131bd3cf6f4d2, type: 3}
+  ParticlePrewarm: 8
+  SwordThrowDistance: 45
+  SwordThrowDuration: 3
+  SwordThrowSpin: 1080
+  SwordThrowVerticalBias: 4

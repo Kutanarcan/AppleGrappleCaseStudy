@@ -11,6 +11,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private readonly PlayerInput         _input;
         private readonly Pool<Sword>         _swordPool;
         private readonly InteractionResolver _resolver;
+        private readonly IGameFeedback       _feedback;
+        private readonly FeedbackConfig      _feedbackConfig;
         private readonly List<Character>     _enemies = new(32);
 
         private Character _player;
@@ -20,14 +22,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public CharacterFactory(CharacterRegistry registry, SpawnMap map,
                                 PlayerInput input, Pool<Sword> swordPool,
                                 InteractionResolver resolver,
+                                IGameFeedback feedback, FeedbackConfig feedbackConfig,
                                 CharacterDefinition playerDefinition,
                                 CharacterDefinition enemyDefinition, int enemyCount)
         {
-            _registry  = registry;
-            _map       = map;
-            _input     = input;
-            _swordPool = swordPool;
-            _resolver  = resolver;
+            _registry       = registry;
+            _map            = map;
+            _input          = input;
+            _swordPool      = swordPool;
+            _resolver       = resolver;
+            _feedback       = feedback;
+            _feedbackConfig = feedbackConfig;
 
             _player = CreateCharacter(playerDefinition);
 
@@ -39,13 +44,13 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             CharacterView view = UnityEngine.Object.Instantiate(definition.ViewPrefab);
 
-            var character = new Character(view, definition, _resolver);
+            var character = new Character(view, definition, _resolver, _feedback);
 
             // The provider may reference the character → character first, then provider
             character.SetDirectionProvider(CreateProvider(definition, character));
 
             if (definition.HasSwordRing)
-                character.AddAbility(new SwordRingAbility(_swordPool));
+                character.AddAbility(new SwordRingAbility(_swordPool, _feedbackConfig));
 
             return character;
         }

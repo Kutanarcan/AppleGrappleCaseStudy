@@ -77,7 +77,6 @@ MonoBehaviour:
   _body: {fileID: 3533988192582549899}
   _hitCollider: {fileID: 1133601330506600239}
   _sprite: {fileID: 1631991314125430812}
-  _neutralizedTint: {r: 1, g: 1, b: 1, a: 0.35}
 --- !u!1 &3440653698965989034
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,7 +148,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3692076050353447541}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}

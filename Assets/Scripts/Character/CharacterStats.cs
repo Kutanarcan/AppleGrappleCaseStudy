@@ -12,7 +12,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public float OrbitRadius;
         public float OrbitAngularSpeed;      // degrees / second
         public float SwordDamage;
-        public float NeutralizeDuration;
 
         /// <summary>
         /// INITIALIZE phase. Does NOT allocate a new object — overwrites the fields.
@@ -30,7 +29,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             OrbitRadius        = def.OrbitRadius;
             OrbitAngularSpeed  = def.OrbitAngularSpeed;
             SwordDamage        = def.SwordDamage;
-            NeutralizeDuration = def.NeutralizeDuration;
         }
     }
 }

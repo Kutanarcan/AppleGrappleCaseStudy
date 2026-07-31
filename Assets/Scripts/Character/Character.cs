@@ -11,6 +11,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private readonly List<IAbility>      _abilities = new(2);
         private readonly CharacterAnimator   _animation;
         private readonly InteractionResolver _resolver;
+        private readonly IGameFeedback       _feedback;
+        private readonly FlashEffect         _flash;
 
         private IDirectionProvider _directionProvider;
         private float _health;
@@ -22,19 +24,22 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public bool IsAlive => IsSpawned && _health > 0f;
         public event Action<Character> Died;
 
-        public CharacterView     View     => _view;
-        public CharacterStats    Stats    { get; }
-        public MovementSimulator Movement { get; }
+        public CharacterView       View       => _view;
+        public CharacterDefinition Definition => _definition;
+        public CharacterStats      Stats      { get; }
+        public MovementSimulator   Movement   { get; }
 
         public Vector2 Position => Movement.Position;
 
         // ================= CREATE =================
         public Character(CharacterView view, CharacterDefinition definition,
-                         InteractionResolver resolver)
+                         InteractionResolver resolver, IGameFeedback feedback)
         {
             _view       = view;
             _definition = definition;
             _resolver   = resolver;
+            _feedback   = feedback;
+            _flash      = new FlashEffect(view.Sprite);
 
             Stats     = new CharacterStats();
             Movement  = new MovementSimulator(view.Body, Stats);
@@ -64,6 +69,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _view.Body.position = position;
             _view.Body.rotation = 0f;
             _view.Bind(this, _resolver);
+            _flash.Reset();
 
             Movement.Initialize();
             _directionProvider.Initialize();
@@ -105,6 +111,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             if (!IsAlive) return;
 
             _health = Mathf.Max(0f, _health - info.Amount);
+
+            _flash.Play(_definition.FlashColor, _definition.FlashDuration);
+            _feedback.CharacterHit(this, info.Point);
+
             if (_health > 0f) return;
 
             Movement.SetDirection(Vector2.zero);
@@ -120,6 +130,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             for (int i = _abilities.Count - 1; i >= 0; i--)
                 _abilities[i].Deinitialize();
 
+            _flash.Reset();                                // do not stay tinted red
             _directionProvider.Deinitialize();
             Movement.Deinitialize();
 

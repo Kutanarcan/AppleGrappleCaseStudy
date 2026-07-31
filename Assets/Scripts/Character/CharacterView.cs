@@ -17,6 +17,15 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public Animator       Animator            => _animator;
         public bool           FacesRightByDefault => _facesRightByDefault;
 
-        public void SetTint(Color color) => _sprite.color = color;
+        public void SetTint(Color color)
+        {
+            if (_sprite != null) _sprite.color = color;
+        }
+
+        private void Reset()
+        {
+            _body   = GetComponent<Rigidbody2D>();
+            _sprite = GetComponentInChildren<SpriteRenderer>();
+        }
     }
 }

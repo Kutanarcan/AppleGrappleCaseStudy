@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
@@ -7,25 +8,68 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [SerializeField] private Rigidbody2D    _body;
         [SerializeField] private Collider2D     _hitCollider;
         [SerializeField] private SpriteRenderer _sprite;
-        [SerializeField] private Color          _neutralizedTint = new(1f, 1f, 1f, 0.35f);
+
+        private Sequence _throwSequence;
+        private Color    _baseColor;
 
         public Rigidbody2D Body => _body;
 
-        private void Reset()
+        private void Awake()
         {
-            _body = GetComponent<Rigidbody2D>();
-            _body.bodyType      = RigidbodyType2D.Kinematic;
-            _body.interpolation = RigidbodyInterpolation2D.Interpolate;
-            _body.useFullKinematicContacts = true;    // becomes MANDATORY in Phase 3, set it right now
+            if (_sprite != null) _baseColor = _sprite.color;
         }
 
         // Enter only — no Stay. The sword rotates: enters, hits, exits, re-enters.
         private void OnTriggerEnter2D(Collider2D other) => ReportContact(other);
 
-        public void SetNeutralized(bool value)
+        /// <summary>
+        /// A thrown sword is visual only: collider off, physics simulation off.
+        /// Without simulated=false the transform tween fights the rigidbody.
+        /// </summary>
+        public void SetDetached(bool value)
         {
-            _hitCollider.enabled = !value;
-            _sprite.color = value ? _neutralizedTint : Color.white;
+            if (_hitCollider != null) _hitCollider.enabled = !value;
+            if (_body != null) _body.simulated = !value;
+        }
+
+        public void PlayThrow(Vector2 direction, float distance, float duration, float spin)
+        {
+            KillThrow();
+
+            Vector3 target = transform.position + (Vector3)(direction * distance);
+
+            _throwSequence = DOTween.Sequence()
+                .Append(transform.DOMove(target, duration).SetEase(Ease.OutQuad))
+                .Join(transform.DORotate(new Vector3(0f, 0f, spin), duration, RotateMode.LocalAxisAdd)
+                               .SetEase(Ease.Linear))
+                // Pooled object: KillOnDestroy never fires, KillOnDisable is mandatory.
+                .SetLink(gameObject, LinkBehaviour.KillOnDisable);
+
+            if (_sprite != null)
+            {
+                // DOTween.ToAlpha (core) instead of the SpriteRenderer DOFade shortcut,
+                // which lives in a DOTween module not present in the DLL-only install.
+                _throwSequence.Join(DOTween
+                    .ToAlpha(() => _sprite.color, c => _sprite.color = c, 0f, duration * 0.45f)
+                    .SetDelay(duration * 0.55f));
+            }
+        }
+
+        public void KillThrow()
+        {
+            if (_throwSequence == null) return;
+
+            Sequence s = _throwSequence;
+            _throwSequence = null;
+            s.Kill(false);                 // complete: false -> OnComplete does not fire
+        }
+
+        /// <summary>Fully reset the visual state when returning to the pool.</summary>
+        public void ResetVisual()
+        {
+            KillThrow();
+            transform.rotation = Quaternion.identity;
+            if (_sprite != null) _sprite.color = _baseColor;
         }
     }
 }

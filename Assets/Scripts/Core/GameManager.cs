@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
@@ -11,6 +12,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         [Header("Prefabs")]
         [SerializeField] private SwordView _swordPrefab;
+
+        [Header("Feedback")]
+        [SerializeField] private FeedbackConfig _feedbackConfig;
+        [SerializeField] private AudioSource    _audioSource;
 
         [Header("Scene")]
         [SerializeField] private SpawnMapView _spawnMapView;
@@ -26,6 +31,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private CharacterFactory    _factory;
         private Pool<Sword>         _swordPool;
         private InteractionResolver _resolver;
+
+        private AudioManager    _audio;
+        private ParticleManager _particles;
+        private GameFeedback    _feedback;
 
         private void Awake()
         {
@@ -50,21 +59,29 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         // Every `new` line here can be handed over to a DI container.
         private void Compose()
         {
+            DOTween.Init(recycleAllByDefault: false, useSafeMode: true, LogBehaviour.ErrorsOnly)
+                   .SetCapacity(tweenersCapacity: 200, sequencesCapacity: 50);
+
             _input      = new PlayerInput();
             _map        = new SpawnMap(_spawnMapView, _spawnSeed);
             _characters = new CharacterRegistry();
+            _resolver   = new InteractionResolver();
 
-            _resolver = new InteractionResolver();
-            _resolver.AddRule(new SwordVsSwordRule());
-            _resolver.AddRule(new SwordVsCharacterRule());
+            _audio     = new AudioManager(_audioSource);
+            _particles = new ParticleManager(_feedbackConfig);
+            _feedback  = new GameFeedback(_audio, _particles, _feedbackConfig);
 
             _swordPool = new Pool<Sword>(
                 create:  CreateSword,
                 destroy: sword => Destroy(sword.View.gameObject),
                 prewarm: _swordPrewarm);
 
-            _factory    = new CharacterFactory(_characters, _map, _input, _swordPool, _resolver,
-                                               _playerDefinition, _enemyDefinition, _enemyCount);
+            _resolver.AddRule(new SwordVsSwordRule(_feedback));
+            _resolver.AddRule(new SwordVsCharacterRule());
+
+            _factory = new CharacterFactory(_characters, _map, _input, _swordPool, _resolver,
+                                            _feedback, _feedbackConfig,
+                                            _playerDefinition, _enemyDefinition, _enemyCount);
         }
 
         private Sword CreateSword()
@@ -78,6 +95,18 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public void Initialize()
         {
             _map.Initialize();
+            _audio.Initialize();
+            _particles.Initialize();
+
+#if UNITY_EDITOR
+            // Fewer enemy points than enemies means SpawnMap wraps and stacks enemies
+            // on the same spot — their sword rings overlap and cancel each other out.
+            int enemyPoints = _map.Count(SpawnCategory.Enemy);
+            if (enemyPoints < _enemyCount)
+                Debug.LogWarning($"SpawnMap: {enemyPoints} enemy point(s) for {_enemyCount} " +
+                                 "enemies — enemies will stack and lose their swords on spawn.");
+#endif
+
             _factory.Initialize();
         }
 
@@ -85,6 +114,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public void Deinitialize()
         {
             _factory.Deinitialize();
+            _particles.Deinitialize();      // no blood splash left on screen
+            _audio.Deinitialize();
             _characters.Deinitialize();
             _map.Deinitialize();
         }
@@ -92,9 +123,12 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         // ================= DISPOSE =================
         private void Dispose()
         {
+            DOTween.KillAll();
+
             // Dispose order matters: the factory returns swords to the pool first,
             // then the pool destroys them.
             _factory?.Dispose();
+            _particles?.Dispose();
             _swordPool?.Dispose();
             _resolver?.Dispose();
 
@@ -103,6 +137,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _input      = null;
             _factory    = null;
+            _particles  = null;
+            _audio      = null;
+            _feedback   = null;
             _swordPool  = null;
             _resolver   = null;
             _characters = null;
@@ -117,6 +154,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             DespawnPending();
 
             float dt = Time.deltaTime;
+
+            _particles.Update(dt);
 
             IReadOnlyList<Character> active = _characters.Active;
             for (int i = 0; i < active.Count; i++)
