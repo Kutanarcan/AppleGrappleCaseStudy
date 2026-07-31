@@ -4,17 +4,23 @@ using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    public sealed class Character : IDisposable
+    public sealed class Character : ICombatant, IDisposable
     {
         private readonly CharacterView       _view;
         private readonly CharacterDefinition _definition;
         private readonly List<IAbility>      _abilities = new(2);
         private readonly CharacterAnimator   _animation;
+        private readonly InteractionResolver _resolver;
 
         private IDirectionProvider _directionProvider;
+        private float _health;
 
         /// <summary>Is it on the field? False for those waiting in the roster.</summary>
         public bool IsSpawned { get; private set; }
+
+        public IInteractionEntity Root => this;
+        public bool IsAlive => IsSpawned && _health > 0f;
+        public event Action<Character> Died;
 
         public CharacterView     View     => _view;
         public CharacterStats    Stats    { get; }
@@ -23,10 +29,12 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public Vector2 Position => Movement.Position;
 
         // ================= CREATE =================
-        public Character(CharacterView view, CharacterDefinition definition)
+        public Character(CharacterView view, CharacterDefinition definition,
+                         InteractionResolver resolver)
         {
             _view       = view;
             _definition = definition;
+            _resolver   = resolver;
 
             Stats     = new CharacterStats();
             Movement  = new MovementSimulator(view.Body, Stats);
@@ -48,12 +56,14 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             if (IsSpawned) return;
 
             Stats.ResetFrom(_definition);
+            _health = Stats.MaxHealth;
 
             // transform first, then activate, then body — avoids an interpolation smear
             _view.transform.position = position;
             _view.gameObject.SetActive(true);
             _view.Body.position = position;
             _view.Body.rotation = 0f;
+            _view.Bind(this, _resolver);
 
             Movement.Initialize();
             _directionProvider.Initialize();
@@ -68,7 +78,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         // ================= TICK =================
         public void Update(float deltaTime)
         {
-            if (!IsSpawned) return;
+            if (!IsAlive) return;
 
             _directionProvider.Update(deltaTime);          // direction is COMPUTED here
 
@@ -80,7 +90,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         public void FixedUpdate(float deltaTime)
         {
-            if (!IsSpawned) return;
+            if (!IsAlive) return;
 
             Movement.SetDirection(_directionProvider.Direction);   // pure read
             Movement.FixedUpdate(deltaTime);
@@ -88,6 +98,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             // Ring moves AFTER the body so it centers on the predicted position
             for (int i = 0; i < _abilities.Count; i++)
                 _abilities[i].FixedUpdate(deltaTime);
+        }
+
+        public void ReceiveDamage(in DamageInfo info)
+        {
+            if (!IsAlive) return;
+
+            _health = Mathf.Max(0f, _health - info.Amount);
+            if (_health > 0f) return;
+
+            Movement.SetDirection(Vector2.zero);
+            Died?.Invoke(this);        // registry queues it, GameManager sweeps
         }
 
         // ================= DEINITIALIZE =================
@@ -102,6 +123,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _directionProvider.Deinitialize();
             Movement.Deinitialize();
 
+            _view.Unbind();
             _view.gameObject.SetActive(false);
         }
 
@@ -112,6 +134,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _abilities.Clear();
             _directionProvider = null;
+            Died = null;
 
             if (_view != null) UnityEngine.Object.Destroy(_view.gameObject);
         }

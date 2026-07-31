@@ -2,8 +2,7 @@ using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    // In Phase 3 the base class will become InteractionBody and OnTriggerEnter2D will be added.
-    public sealed class SwordView : MonoBehaviour
+    public sealed class SwordView : InteractionBody
     {
         [SerializeField] private Rigidbody2D    _body;
         [SerializeField] private Collider2D     _hitCollider;
@@ -19,6 +18,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _body.interpolation = RigidbodyInterpolation2D.Interpolate;
             _body.useFullKinematicContacts = true;    // becomes MANDATORY in Phase 3, set it right now
         }
+
+        // Enter only — no Stay. The sword rotates: enters, hits, exits, re-enters.
+        private void OnTriggerEnter2D(Collider2D other) => ReportContact(other);
 
         public void SetNeutralized(bool value)
         {

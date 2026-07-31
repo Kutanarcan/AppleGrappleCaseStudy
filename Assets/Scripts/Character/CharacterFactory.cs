@@ -1,14 +1,17 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
     public sealed class CharacterFactory : IDisposable
     {
-        private readonly CharacterRegistry _registry;
-        private readonly SpawnMap          _map;
-        private readonly PlayerInput       _input;
-        private readonly Pool<Sword>       _swordPool;
+        private readonly CharacterRegistry   _registry;
+        private readonly SpawnMap            _map;
+        private readonly PlayerInput         _input;
+        private readonly Pool<Sword>         _swordPool;
+        private readonly InteractionResolver _resolver;
+        private readonly List<Character>     _enemies = new(32);
 
         private Character _player;
 
@@ -16,21 +19,27 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         // The roster is born here. After this no character is ever Instantiated.
         public CharacterFactory(CharacterRegistry registry, SpawnMap map,
                                 PlayerInput input, Pool<Sword> swordPool,
-                                CharacterDefinition playerDefinition)
+                                InteractionResolver resolver,
+                                CharacterDefinition playerDefinition,
+                                CharacterDefinition enemyDefinition, int enemyCount)
         {
             _registry  = registry;
             _map       = map;
             _input     = input;
             _swordPool = swordPool;
+            _resolver  = resolver;
 
             _player = CreateCharacter(playerDefinition);
+
+            for (int i = 0; i < enemyCount; i++)
+                _enemies.Add(CreateCharacter(enemyDefinition));
         }
 
         private Character CreateCharacter(CharacterDefinition definition)
         {
             CharacterView view = UnityEngine.Object.Instantiate(definition.ViewPrefab);
 
-            var character = new Character(view, definition);
+            var character = new Character(view, definition, _resolver);
 
             // The provider may reference the character → character first, then provider
             character.SetDirectionProvider(CreateProvider(definition, character));
@@ -54,7 +63,13 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         }
 
         // ================= INITIALIZE =================
-        public void Initialize() => Place(_player, SpawnCategory.Player);
+        public void Initialize()
+        {
+            Place(_player, SpawnCategory.Player);
+
+            for (int i = 0; i < _enemies.Count; i++)
+                Place(_enemies[i], SpawnCategory.Enemy);
+        }
 
         private void Place(Character character, SpawnCategory category)
         {
@@ -72,13 +87,24 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         }
 
         // ================= DEINITIALIZE =================
-        public void Deinitialize() => Despawn(_player);
+        public void Deinitialize()
+        {
+            Despawn(_player);
+
+            for (int i = 0; i < _enemies.Count; i++)
+                Despawn(_enemies[i]);
+        }
 
         // ================= DISPOSE =================
         public void Dispose()
         {
             _player?.Dispose();
             _player = null;
+
+            for (int i = 0; i < _enemies.Count; i++)
+                _enemies[i].Dispose();
+
+            _enemies.Clear();
         }
     }
 }

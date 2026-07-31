@@ -7,6 +7,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
     {
         [Header("Definitions")]
         [SerializeField] private CharacterDefinition _playerDefinition;
+        [SerializeField] private CharacterDefinition _enemyDefinition;
 
         [Header("Prefabs")]
         [SerializeField] private SwordView _swordPrefab;
@@ -14,15 +15,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [Header("Scene")]
         [SerializeField] private SpawnMapView _spawnMapView;
         [SerializeField] private int _spawnSeed = 12345;
+        [SerializeField] private int _enemyCount = 8;
 
         [Header("Pooling")]
         [SerializeField] private int _swordPrewarm = 48;
 
-        private PlayerInput       _input;
-        private SpawnMap          _map;
-        private CharacterRegistry _characters;
-        private CharacterFactory  _factory;
-        private Pool<Sword>       _swordPool;
+        private PlayerInput         _input;
+        private SpawnMap            _map;
+        private CharacterRegistry   _characters;
+        private CharacterFactory    _factory;
+        private Pool<Sword>         _swordPool;
+        private InteractionResolver _resolver;
 
         private void Awake()
         {
@@ -51,19 +54,24 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _map        = new SpawnMap(_spawnMapView, _spawnSeed);
             _characters = new CharacterRegistry();
 
+            _resolver = new InteractionResolver();
+            _resolver.AddRule(new SwordVsSwordRule());
+            _resolver.AddRule(new SwordVsCharacterRule());
+
             _swordPool = new Pool<Sword>(
                 create:  CreateSword,
                 destroy: sword => Destroy(sword.View.gameObject),
                 prewarm: _swordPrewarm);
 
-            _factory    = new CharacterFactory(_characters, _map, _input, _swordPool, _playerDefinition);
+            _factory    = new CharacterFactory(_characters, _map, _input, _swordPool, _resolver,
+                                               _playerDefinition, _enemyDefinition, _enemyCount);
         }
 
         private Sword CreateSword()
         {
             SwordView view = Instantiate(_swordPrefab);
             view.gameObject.SetActive(false);
-            return new Sword(view);
+            return new Sword(view, _resolver);
         }
 
         // ================= INITIALIZE =================
@@ -88,6 +96,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             // then the pool destroys them.
             _factory?.Dispose();
             _swordPool?.Dispose();
+            _resolver?.Dispose();
 
             _input?.Disable();
             _input?.Dispose();
@@ -95,6 +104,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _input      = null;
             _factory    = null;
             _swordPool  = null;
+            _resolver   = null;
             _characters = null;
             _map        = null;
         }
@@ -102,6 +112,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         // ================= TICK =================
         private void Update()
         {
+            // Deaths are triggered inside physics callbacks; we sweep after all of
+            // this frame's physics steps have finished.
+            DespawnPending();
+
             float dt = Time.deltaTime;
 
             IReadOnlyList<Character> active = _characters.Active;
@@ -111,6 +125,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 #if UNITY_EDITOR
             if (Input.GetKeyDown(KeyCode.R)) Restart();   // reset demo
 #endif
+        }
+
+        private void DespawnPending()
+        {
+            IReadOnlyList<Character> pending = _characters.PendingRemoval;
+            if (pending.Count == 0) return;
+
+            for (int i = 0; i < pending.Count; i++)
+                _factory.Despawn(pending[i]);       // NOT Destroy — just deactivates
+
+            _characters.ClearPending();
         }
 
         private void FixedUpdate()

@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c6e9da2301288fe43b6b62e77b6e6d59, type: 3}
-  m_Name: Player_Definition
+  m_Name: Enemy_Ringed
   m_EditorClassIdentifier: 
   ViewPrefab: {fileID: 2193605570509476394, guid: 936707d04b68b6c49b82f4b215613f4c, type: 3}
-  BrainType: 0
+  BrainType: 2
   HasSwordRing: 1
   MoveSpeed: 7.5
   Acceleration: 100
   Deceleration: 350
   MaxHealth: 100
-  SwordCount: 3
+  SwordCount: 2
   MaxSwordCount: 36
   OrbitRadius: 2.25
   OrbitAngularSpeed: 150

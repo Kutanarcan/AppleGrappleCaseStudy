@@ -4,20 +4,26 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 {
     public enum SwordState { Active, Neutralized }
 
-    // Neutralization logic is COMPLETE here — just not wired to combat yet.
-    // In Phase 3 `: ICombatant`, `Root` and the resolver link will be added.
-    public sealed class Sword
+    public sealed class Sword : ICombatant
     {
-        private readonly SwordView _view;
+        private readonly SwordView           _view;
+        private readonly InteractionResolver _resolver;
 
         private Character _owner;
         private float _recoveryTimer;
 
         /// <summary>CREATE phase — the pool's create function calls this.</summary>
-        public Sword(SwordView view) => _view = view;
+        public Sword(SwordView view, InteractionResolver resolver)
+        {
+            _view     = view;
+            _resolver = resolver;
+        }
 
         public SwordState State { get; private set; }
         public SwordView  View  => _view;
+
+        // Root is the owning character — the top of the chain, not the sword itself.
+        public IInteractionEntity Root => _owner;
 
         public float Damage             => _owner != null ? _owner.Stats.SwordDamage        : 0f;
         public float NeutralizeDuration => _owner != null ? _owner.Stats.NeutralizeDuration : 1f;
@@ -30,6 +36,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _view.gameObject.SetActive(true);
             _view.SetNeutralized(false);
+            _view.Bind(this, _resolver);
         }
 
         public void FixedUpdate(float deltaTime)
@@ -68,6 +75,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         public void Deinitialize()
         {
+            _view.Unbind();
             _view.Body.linearVelocity = Vector2.zero;
             _view.SetNeutralized(false);
             _view.gameObject.SetActive(false);

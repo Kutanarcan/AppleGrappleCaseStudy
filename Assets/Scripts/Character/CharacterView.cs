@@ -2,9 +2,10 @@ using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    // In Phase 3 the base class will become InteractionBody.
     // Dumb holder — references and serialized config only, no logic.
-    public sealed class CharacterView : MonoBehaviour
+    // Detection is source-side (sword/collectible reports), so no trigger here;
+    // the character is only resolved via attachedRigidbody.
+    public sealed class CharacterView : InteractionBody
     {
         [SerializeField] private Rigidbody2D    _body;
         [SerializeField] private SpriteRenderer _sprite;
