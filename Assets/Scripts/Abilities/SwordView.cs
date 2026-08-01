@@ -11,12 +11,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         private Sequence _throwSequence;
         private Color    _baseColor;
+        private Vector3  _baseSpriteScale = Vector3.one;
 
         public Rigidbody2D Body => _body;
 
         private void Awake()
         {
-            if (_sprite != null) _baseColor = _sprite.color;
+            if (_sprite != null)
+            {
+                _baseColor       = _sprite.color;
+                _baseSpriteScale = _sprite.transform.localScale;
+            }
         }
 
         private void OnTriggerEnter2D(Collider2D other) => ReportContact(other);
@@ -25,6 +30,16 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             if (_hitCollider != null) _hitCollider.enabled = !value;
             if (_body != null) _body.simulated = !value;
+        }
+
+        /// <summary>
+        /// Visual pop-in. Scales only the sprite, never the collider — the sword is
+        /// logically present at full size the moment it spawns, it just grows into view.
+        /// A scaled-to-zero collider would otherwise log degenerate-shape warnings.
+        /// </summary>
+        public void SetScale(float scale)
+        {
+            if (_sprite != null) _sprite.transform.localScale = _baseSpriteScale * scale;
         }
 
         public void PlayThrow(Vector2 direction, float distance, float duration, float spin)
@@ -63,7 +78,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             KillThrow();
             transform.rotation = Quaternion.identity;
-            if (_sprite != null) _sprite.color = _baseColor;
+            if (_sprite != null)
+            {
+                _sprite.color                = _baseColor;
+                _sprite.transform.localScale = _baseSpriteScale;
+            }
         }
     }
 }

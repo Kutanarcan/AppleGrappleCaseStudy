@@ -20,14 +20,21 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [Header("Sword throw")]
         public float SwordThrowDistance     = 3.5f;
         public float SwordThrowDuration     = 1.0f;
-        public float SwordThrowSpin         = 720f;  
-        public float SwordThrowVerticalBias = 1.2f;  
+        public float SwordThrowSpin         = 720f;
+        public float SwordThrowVerticalBias = 1.2f;
+
+        [Header("Collectible pickup")]
+        [Tooltip("Time for the bubble to fly into the character. Must be shorter than RingEntryTime.")]
+        public float CollectFlyDuration = 0.25f;
+        public float CollectEndScale    = 0.15f;
 
         private void OnValidate()
         {
             SwordThrowDuration = Mathf.Max(0.05f, SwordThrowDuration);
             SwordThrowDistance = Mathf.Max(0f, SwordThrowDistance);
             ParticlePrewarm    = Mathf.Max(0, ParticlePrewarm);
+            CollectFlyDuration = Mathf.Max(0.05f, CollectFlyDuration);
+            CollectEndScale    = Mathf.Clamp(CollectEndScale, 0.01f, 1f);
         }
     }
 }

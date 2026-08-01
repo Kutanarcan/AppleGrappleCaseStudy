@@ -96,6 +96,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _view.Body.MoveRotation(angleRad * Mathf.Rad2Deg);
         }
 
+        /// <summary>Visual entry pop-in — 0 grows to full size. Presentation only.</summary>
+        public void SetScale(float scale) => _view.SetScale(scale);
+
         public void Deinitialize()
         {
             _view.Unbind();

@@ -709,6 +709,7 @@ MonoBehaviour:
   _playerDefinition: {fileID: 11400000, guid: 05d03330870e496408b8a05f2572b14a, type: 2}
   _enemyDefinition: {fileID: 11400000, guid: bcf7daf0b59b76d49a0842835ee87540, type: 2}
   _swordPrefab: {fileID: 6654344984250036309, guid: e8178e4a4741f9a4d8c3b5c51c174726, type: 3}
+  _collectiblePrefab: {fileID: 2278113969243520603, guid: 68b9446e618efc94280192d361e03f00, type: 3}
   _feedbackConfig: {fileID: 11400000, guid: 45fee817b50252c4abeec794edd4ebf6, type: 2}
   _audioSource: {fileID: 1863094907}
   _arenaView: {fileID: 2054741028}
@@ -721,6 +722,11 @@ MonoBehaviour:
   _randomMargin: 3
   _spawnSeed: 12345
   _enemyCount: 3
+  _collectibleSettings:
+    SpawnInterval: 2
+    MaxActive: 20
+    SwordAmount: 1
+  _collectiblePrewarm: 30
   _swordPrewarm: 48
 --- !u!4 &1853262275
 Transform:

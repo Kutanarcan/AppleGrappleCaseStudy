@@ -11,7 +11,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [SerializeField] private CharacterDefinition _enemyDefinition;
 
         [Header("Prefabs")]
-        [SerializeField] private SwordView _swordPrefab;
+        [SerializeField] private SwordView            _swordPrefab;
+        [SerializeField] private SwordCollectibleView _collectiblePrefab;
 
         [Header("Feedback")]
         [SerializeField] private FeedbackConfig _feedbackConfig;
@@ -33,6 +34,15 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [Header("Scene")]
         [SerializeField] private int _enemyCount = 8;
 
+        [Header("Collectibles")]
+        [SerializeField] private SwordCollectibleSpawnSettings _collectibleSettings = new()
+        {
+            SpawnInterval = 3f,
+            MaxActive     = 6,
+            SwordAmount   = 1
+        };
+        [SerializeField] private int _collectiblePrewarm = 8;
+
         [Header("Pooling")]
         [SerializeField] private int _swordPrewarm = 48;
 
@@ -43,6 +53,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private CharacterFactory    _factory;
         private Pool<Sword>         _swordPool;
         private InteractionResolver _resolver;
+        private SwordCollectibleSpawner _collectibles;
 
         private AudioManager    _audio;
         private ParticleManager _particles;
@@ -92,6 +103,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                 destroy: sword => Destroy(sword.View.gameObject),
                 prewarm: _swordPrewarm);
 
+            _collectibles = new SwordCollectibleSpawner(
+                _collectiblePrefab, _resolver, _map, _collectibleSettings, _collectiblePrewarm);
+
+            _resolver.AddRule(new SwordPickupRule(_feedback, _feedbackConfig));
             _resolver.AddRule(new SwordVsSwordRule(_feedback));
             _resolver.AddRule(new SwordVsCharacterRule());
 
@@ -113,6 +128,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _map.Initialize(1 + _enemyCount);      // player + enemies share one polygon
             _audio.Initialize();
             _particles.Initialize();
+            _collectibles.Initialize();
             _factory.Initialize();
         }
 
@@ -120,6 +136,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public void Deinitialize()
         {
             _factory.Deinitialize();
+            _collectibles.Deinitialize();   // flying bubbles return to the pool at once
             _particles.Deinitialize();      // no blood splash left on screen
             _audio.Deinitialize();
             _characters.Deinitialize();
@@ -134,6 +151,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             // Dispose order matters: the factory returns swords to the pool first,
             // then the pool destroys them.
             _factory?.Dispose();
+            _collectibles?.Dispose();
             _particles?.Dispose();
             _swordPool?.Dispose();
             _resolver?.Dispose();
@@ -152,6 +170,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _characters = null;
             _map        = null;
             _arena      = null;
+            _collectibles = null;
         }
 
         // ================= TICK =================
@@ -164,6 +183,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             float dt = Time.deltaTime;
 
             _particles.Update(dt);
+            _collectibles.Update(dt);
 
             IReadOnlyList<Character> active = _characters.Active;
             for (int i = 0; i < active.Count; i++)

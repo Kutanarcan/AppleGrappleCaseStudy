@@ -27,6 +27,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             public float OffsetVel;
             public float Radius;
             public float RadiusVel;
+            public float Scale;       // visual entry pop-in: 0 grows to 1
+            public float ScaleVel;
         }
 
         // static comparison so Sort() does not allocate a delegate on every call
@@ -98,6 +100,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
                 slot.Radius = Mathf.SmoothDamp(
                     slot.Radius, radius, ref slot.RadiusVel, entryTime, Mathf.Infinity, deltaTime);
+
+                // Entry pop-in: a freshly added sword grows from 0 to full size in place.
+                slot.Scale = Mathf.SmoothDamp(
+                    slot.Scale, 1f, ref slot.ScaleVel, entryTime, Mathf.Infinity, deltaTime);
 
                 _slots[i] = slot;                       // struct → write back
 
@@ -171,8 +177,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                 SlotIndex = _slots.Count,
                 Offset    = FindEntryOffset(),        // enter the widest gap
                 OffsetVel = 0f,
-                Radius    = _owner.Stats.OrbitRadius * _owner.Definition.RingEntryRadiusScale,
-                RadiusVel = 0f
+                Radius    = _owner.Stats.OrbitRadius, // no outside-in spiral — enter at the ring
+                RadiusVel = 0f,
+                Scale     = 0f,                       // grow into view from nothing
+                ScaleVel  = 0f
             };
             _slots.Add(slot);
 
@@ -282,6 +290,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                 slot.OffsetVel = 0f;
                 slot.Radius    = radius;
                 slot.RadiusVel = 0f;
+                slot.Scale     = 1f;                    // round start is instant — full size
+                slot.ScaleVel  = 0f;
                 _slots[i] = slot;
 
                 PlaceSlot(slot, center, snap: true);    // teleport to final ring position
@@ -295,6 +305,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             float rad = (_phase + slot.Offset) * Mathf.Deg2Rad;
             Vector2 pos = center + new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * slot.Radius;
+
+            slot.Sword.SetScale(slot.Scale);
 
             if (snap)
                 slot.Sword.SnapTo(pos, rad);

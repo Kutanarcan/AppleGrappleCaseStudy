@@ -36,11 +36,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [Tooltip("How long the remaining swords take to slide into their new slots after one is lost.")]
         public float RingSettleTime = 0.18f;
 
-        [Tooltip("How long a new sword takes to spiral inward.")]
+        [Tooltip("How long a new sword takes to grow from zero to full size.")]
         public float RingEntryTime = 0.35f;
-
-        [Tooltip("A new sword starts at this multiple of OrbitRadius.")]
-        public float RingEntryRadiusScale = 2.5f;
 
         [Header("Feedback")]
         public AudioClip HitClip;                       // PlayerHit / EnemyHit
@@ -63,7 +60,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             FlashDuration        = Mathf.Max(0.02f, FlashDuration);
             RingSettleTime       = Mathf.Max(0.01f, RingSettleTime);
             RingEntryTime        = Mathf.Max(0.01f, RingEntryTime);
-            RingEntryRadiusScale = Mathf.Max(1f, RingEntryRadiusScale);
             AggroExitRadius      = Mathf.Max(AggroExitRadius, AggroEnterRadius);
             SwordAdvantageMargin = Mathf.Max(1, SwordAdvantageMargin);
         }
