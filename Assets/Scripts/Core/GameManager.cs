@@ -17,15 +17,27 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [SerializeField] private FeedbackConfig _feedbackConfig;
         [SerializeField] private AudioSource    _audioSource;
 
+        [Header("Arena")]
+        [SerializeField] private ArenaView _arenaView;
+        [SerializeField] private float _arenaWidth    = 22f;
+        [SerializeField] private float _arenaHeight   = 16f;
+        [SerializeField] private float _wallThickness = 0.5f;
+        [SerializeField] private float _arenaMarginOffset = 4f;
+
+        [Header("Spawn")]
+        [SerializeField] private float _minCharacterSeparation = 3.5f;
+        [SerializeField] private float _characterMargin        = 1.5f;
+        [SerializeField] private float _randomMargin           = 1.5f;
+        [SerializeField] private int   _spawnSeed              = 12345;
+
         [Header("Scene")]
-        [SerializeField] private SpawnMapView _spawnMapView;
-        [SerializeField] private int _spawnSeed = 12345;
         [SerializeField] private int _enemyCount = 8;
 
         [Header("Pooling")]
         [SerializeField] private int _swordPrewarm = 48;
 
         private PlayerInput         _input;
+        private Arena               _arena;
         private SpawnMap            _map;
         private CharacterRegistry   _characters;
         private CharacterFactory    _factory;
@@ -63,7 +75,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                    .SetCapacity(tweenersCapacity: 200, sequencesCapacity: 50);
 
             _input      = new PlayerInput();
-            _map        = new SpawnMap(_spawnMapView, _spawnSeed);
+
+            // Arena first: ground/mask are sized, the fence is spawned, Min/Max become known
+            _arena      = new Arena(_arenaView, _arenaWidth, _arenaHeight, _wallThickness, _arenaMarginOffset);
+            _map        = new SpawnMap(_arena, _spawnSeed,
+                                       _minCharacterSeparation, _characterMargin, _randomMargin);
             _characters = new CharacterRegistry();
             _resolver   = new InteractionResolver();
 
@@ -94,19 +110,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         // ================= INITIALIZE =================
         public void Initialize()
         {
-            _map.Initialize();
+            _map.Initialize(1 + _enemyCount);      // player + enemies share one polygon
             _audio.Initialize();
             _particles.Initialize();
-
-#if UNITY_EDITOR
-            // Fewer enemy points than enemies means SpawnMap wraps and stacks enemies
-            // on the same spot — their sword rings overlap and cancel each other out.
-            int enemyPoints = _map.Count(SpawnCategory.Enemy);
-            if (enemyPoints < _enemyCount)
-                Debug.LogWarning($"SpawnMap: {enemyPoints} enemy point(s) for {_enemyCount} " +
-                                 "enemies — enemies will stack and lose their swords on spawn.");
-#endif
-
             _factory.Initialize();
         }
 
@@ -131,6 +137,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _particles?.Dispose();
             _swordPool?.Dispose();
             _resolver?.Dispose();
+            _arena?.Dispose();               // destroys the fence pieces
 
             _input?.Disable();
             _input?.Dispose();
@@ -144,6 +151,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _resolver   = null;
             _characters = null;
             _map        = null;
+            _arena      = null;
         }
 
         // ================= TICK =================

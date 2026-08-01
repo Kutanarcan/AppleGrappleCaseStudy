@@ -1,107 +1,109 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
+    /// <summary>
+    /// COMPUTES spawn points — no hand-placed Transforms in the scene.
+    ///
+    ///   Player / Enemy   → Polygonal (regular polygon around the center)
+    ///   Collectible/Prop → Random    (anywhere inside Min/Max, may overlap)
+    /// </summary>
     public sealed class SpawnMap
     {
-        private sealed class Bucket
-        {
-            public Vector2[] Points;
-            public SpawnPick Pick;
-            public int[]     Bag;      // shuffled index list for Random
-            public int       Cursor;
-        }
-
-        private readonly Dictionary<SpawnCategory, Bucket> _buckets = new(4);
-
-        // Built once in CREATE. NOT recreated in Initialize:
-        // characters are Sequential so their retry layout is already identical,
-        // while collectibles are meant to lay out differently each retry.
+        private readonly Arena         _arena;
         private readonly System.Random _random;
+        private readonly float         _minCharacterSeparation;
+        private readonly float         _characterMargin;
+        private readonly float         _randomMargin;
 
-        /// <summary>CREATE phase — Transforms are copied to Vector2, no link to the view remains.</summary>
-        public SpawnMap(SpawnMapView view, int seed)
+        private int _characterCount = 1;
+        private int _characterCursor;
+
+        /// <summary>CREATE phase.</summary>
+        public SpawnMap(Arena arena, int seed,
+                        float minCharacterSeparation, float characterMargin, float randomMargin)
         {
-            _random = new System.Random(seed);
-
-            AddBucket(view, SpawnCategory.Player,      SpawnPick.Sequential);
-            AddBucket(view, SpawnCategory.Enemy,       SpawnPick.Sequential);
-            AddBucket(view, SpawnCategory.Collectible, SpawnPick.Random);
-            AddBucket(view, SpawnCategory.Prop,        SpawnPick.Random);
+            _arena                  = arena;
+            _random                 = new System.Random(seed);
+            _minCharacterSeparation = Mathf.Max(0.1f, minCharacterSeparation);
+            _characterMargin        = Mathf.Max(0f, characterMargin);
+            _randomMargin           = Mathf.Max(0f, randomMargin);
         }
 
-        private void AddBucket(SpawnMapView view, SpawnCategory category, SpawnPick pick)
+        /// <summary>
+        /// INITIALIZE phase. The total character count decides how many corners the
+        /// polygon has — Player and Enemy SHARE the same polygon.
+        /// </summary>
+        public void Initialize(int characterCount)
         {
-            Transform[] transforms = view != null
-                ? view.GetPoints(category)
-                : Array.Empty<Transform>();
-
-            int count = transforms?.Length ?? 0;
-            var points = new Vector2[count];
-            var bag    = new int[count];
-
-            for (int i = 0; i < count; i++)
-            {
-                points[i] = transforms[i] != null ? (Vector2)transforms[i].position : Vector2.zero;
-                bag[i]    = i;
-            }
-
-            _buckets[category] = new Bucket { Points = points, Pick = pick, Bag = bag, Cursor = 0 };
-        }
-
-        public int Count(SpawnCategory category) => _buckets[category].Points.Length;
-
-        /// <summary>INITIALIZE phase — cursor resets, Random buckets are reshuffled.</summary>
-        public void Initialize()
-        {
-            foreach (Bucket bucket in _buckets.Values)
-            {
-                bucket.Cursor = 0;
-                if (bucket.Pick == SpawnPick.Random) Shuffle(bucket);
-            }
+            _characterCount  = Mathf.Max(1, characterCount);
+            _characterCursor = 0;
         }
 
         public Vector2 Next(SpawnCategory category)
         {
-            Bucket bucket = _buckets[category];
-
-            if (bucket.Points.Length == 0)
+            switch (category)
             {
-                Debug.LogWarning($"SpawnMap: no points defined for '{category}'.");
-                return Vector2.zero;
-            }
+                case SpawnCategory.Player:
+                case SpawnCategory.Enemy:
+                    return NextPolygonal();
 
-            if (bucket.Pick == SpawnPick.Sequential)
-            {
-                Vector2 point = bucket.Points[bucket.Cursor];
-                bucket.Cursor = (bucket.Cursor + 1) % bucket.Points.Length;
-                return point;
+                default:
+                    return NextRandom();
             }
-
-            // Shuffle bag: no point repeats until every point has been dealt once
-            if (bucket.Cursor >= bucket.Bag.Length) Shuffle(bucket);
-            return bucket.Points[bucket.Bag[bucket.Cursor++]];
         }
 
-        private void Shuffle(Bucket bucket)
+        // ================= POLYGONAL =================
+        private Vector2 NextPolygonal()
         {
-            int[] bag = bucket.Bag;
+            if (_characterCount <= 1) return _arena.Center;
 
-            for (int i = bag.Length - 1; i > 0; i--)
+            int index = _characterCursor % _characterCount;
+            _characterCursor++;
+
+            float radius = CharacterRadius(_characterCount);
+            float angle  = index * (360f / _characterCount) * Mathf.Deg2Rad;
+
+            return _arena.Center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+        }
+
+        /// <summary>
+        /// Neighbour distance = 2R·sin(π/N). The R that makes it MinCharacterSeparation.
+        /// If it does not fit it is clamped — sword rings may overlap at the start.
+        /// </summary>
+        private float CharacterRadius(int total)
+        {
+            float needed = _minCharacterSeparation / (2f * Mathf.Sin(Mathf.PI / total));
+            float max    = Mathf.Min(_arena.Width, _arena.Height) * 0.5f - _characterMargin;
+
+            if (max <= 0f)
             {
-                int j = _random.Next(i + 1);
-                (bag[i], bag[j]) = (bag[j], bag[i]);
+                Debug.LogWarning("SpawnMap: CharacterMargin is larger than the arena.");
+                return 0f;
             }
 
-            bucket.Cursor = 0;
+            if (needed > max)
+            {
+                Debug.LogWarning(
+                    $"SpawnMap: {total} characters need radius {needed:F2}, only {max:F2} available. " +
+                    $"Sword rings may overlap at the start. " +
+                    $"Increase the arena size or reduce MinCharacterSeparation.");
+            }
+
+            return Mathf.Min(needed, max);
         }
 
-        public void Deinitialize()
+        // ================= RANDOM =================
+        private Vector2 NextRandom()
         {
-            foreach (Bucket bucket in _buckets.Values)
-                bucket.Cursor = 0;
+            Vector2 min = _arena.Min + Vector2.one * _randomMargin;
+            Vector2 max = _arena.Max - Vector2.one * _randomMargin;
+
+            return new Vector2(
+                Mathf.Lerp(min.x, max.x, (float)_random.NextDouble()),
+                Mathf.Lerp(min.y, max.y, (float)_random.NextDouble()));
         }
+
+        public void Deinitialize() => _characterCursor = 0;
     }
 }

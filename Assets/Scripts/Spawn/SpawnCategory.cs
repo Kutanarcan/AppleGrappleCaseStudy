@@ -5,12 +5,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         Player,
         Enemy,
         Collectible,
-        Prop       
-    }
-
-    public enum SpawnPick
-    {
-        Sequential,
-        Random
+        Prop
     }
 }
