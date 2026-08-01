@@ -19,13 +19,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             if (_sprite != null) _baseColor = _sprite.color;
         }
 
-        // Enter only — no Stay. The sword rotates: enters, hits, exits, re-enters.
         private void OnTriggerEnter2D(Collider2D other) => ReportContact(other);
 
-        /// <summary>
-        /// A thrown sword is visual only: collider off, physics simulation off.
-        /// Without simulated=false the transform tween fights the rigidbody.
-        /// </summary>
         public void SetDetached(bool value)
         {
             if (_hitCollider != null) _hitCollider.enabled = !value;
@@ -42,7 +37,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                 .Append(transform.DOMove(target, duration).SetEase(Ease.OutQuad))
                 .Join(transform.DORotate(new Vector3(0f, 0f, spin), duration, RotateMode.LocalAxisAdd)
                                .SetEase(Ease.Linear))
-                // Pooled object: KillOnDestroy never fires, KillOnDisable is mandatory.
                 .SetLink(gameObject, LinkBehaviour.KillOnDisable);
 
             if (_sprite != null)

@@ -5,7 +5,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
     [CreateAssetMenu(menuName = "Game/Feedback Config")]
     public sealed class FeedbackConfig : ScriptableObject
     {
-        [Header("Sounds (not character-specific)")]
+        [Header("Sounds")]
         public AudioClip SwordClashClip;
         public AudioClip CollectClip;
 
@@ -20,8 +20,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [Header("Sword throw")]
         public float SwordThrowDistance     = 3.5f;
         public float SwordThrowDuration     = 1.0f;
-        public float SwordThrowSpin         = 720f;   // degrees
-        public float SwordThrowVerticalBias = 1.2f;   // up/down push strength
+        public float SwordThrowSpin         = 720f;  
+        public float SwordThrowVerticalBias = 1.2f;  
 
         private void OnValidate()
         {

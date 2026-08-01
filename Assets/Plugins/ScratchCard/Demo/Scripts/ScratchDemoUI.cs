@@ -121,8 +121,8 @@ namespace ScratchCardAsset.Demo
                 OnReset();
             }
 
-            ScratchCircle();
-            ScratchSword();
+            //ScratchCircle();
+            //ScratchSword();
         }
 
         private void ScratchSword()
