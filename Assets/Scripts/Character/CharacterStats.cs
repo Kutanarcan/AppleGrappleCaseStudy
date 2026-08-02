@@ -7,6 +7,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public float Deceleration;
         public float MaxHealth;
 
+        public float KnockbackForce;
+        public float KnockbackStunDuration;
+
         public int   SwordCount;
         public int   MaxSwordCount;
         public float OrbitRadius;
@@ -23,6 +26,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             Acceleration = def.Acceleration;
             Deceleration = def.Deceleration;
             MaxHealth    = def.MaxHealth;
+
+            KnockbackForce        = def.KnockbackForce;
+            KnockbackStunDuration = def.KnockbackStunDuration;
 
             SwordCount         = def.SwordCount;
             MaxSwordCount      = def.MaxSwordCount;

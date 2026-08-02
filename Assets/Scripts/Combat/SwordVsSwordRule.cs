@@ -24,7 +24,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             a.Ring.Detach(a,  aSign);
             b.Ring.Detach(b, -aSign);
 
-            _feedback.SwordClash((a.Position + b.Position) * 0.5f);
+            _feedback.SwordClash(a, b, (a.Position + b.Position) * 0.5f);
             return true;
         }
     }

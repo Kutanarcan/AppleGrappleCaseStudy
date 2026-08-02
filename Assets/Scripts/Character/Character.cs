@@ -16,12 +16,16 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         private IDirectionProvider _directionProvider;
         private float _health;
+        private float _stunTimer;
 
         /// <summary>Is it on the field? False for those waiting in the roster.</summary>
         public bool IsSpawned { get; private set; }
 
         public IInteractionEntity Root => this;
         public bool IsAlive => IsSpawned && _health > 0f;
+
+        /// <summary>Single place that answers "is this the one the human drives?".</summary>
+        public bool IsPlayer => _definition.BrainType == CharacterBrainType.Player;
         public event Action<Character> Died;
 
         public CharacterView       View       => _view;
@@ -61,7 +65,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             if (IsSpawned) return;
 
             Stats.ResetFrom(_definition);
-            _health = Stats.MaxHealth;
+            _health    = Stats.MaxHealth;
+            _stunTimer = 0f;                     // roster reuse — never respawn stunned
 
             // transform first, then activate, then body — avoids an interpolation smear
             _view.transform.position = position;
@@ -98,8 +103,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             if (!IsAlive) return;
 
-            Movement.SetDirection(_directionProvider.Direction);   // pure read
+            // Stunned: own input is muted so the knockback impulse reads as a clean push-back.
+            Movement.SetDirection(_stunTimer > 0f ? Vector2.zero : _directionProvider.Direction);
             Movement.FixedUpdate(deltaTime);
+
+            if (_stunTimer > 0f) _stunTimer -= deltaTime;
 
             // Ring moves AFTER the body so it centers on the predicted position
             for (int i = 0; i < _abilities.Count; i++)
@@ -114,11 +122,30 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _flash.Play(_definition.FlashColor, _definition.FlashDuration);
             _feedback.CharacterHit(this, info.Point);
+            ApplyKnockback(info);
 
             if (_health > 0f) return;
 
             Movement.SetDirection(Vector2.zero);
             Died?.Invoke(this);        // registry queues it, GameManager sweeps
+        }
+
+        /// <summary>
+        /// Lives here, not in the combat rule: reacting to damage is the character's own
+        /// business, so every future damage source gets knockback for free.
+        ///
+        /// Direction comes from the contact point — pushing away from where the blade
+        /// landed reads better than pushing away from the attacker's center.
+        /// </summary>
+        private void ApplyKnockback(in DamageInfo info)
+        {
+            if (Stats.KnockbackForce <= 0f) return;
+
+            Vector2 away = Position - info.Point;
+            if (away.sqrMagnitude < 0.0001f) return;   // dead-center hit — no usable direction
+
+            Movement.AddImpulse(away.normalized * Stats.KnockbackForce);
+            _stunTimer = Stats.KnockbackStunDuration;
         }
 
         // ================= DEINITIALIZE =================
@@ -131,6 +158,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                 _abilities[i].Deinitialize();
 
             _flash.Reset();                                // do not stay tinted red
+            _stunTimer = 0f;
             _directionProvider.Deinitialize();
             Movement.Deinitialize();
 

@@ -25,6 +25,14 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public float Deceleration = 60f;
         public float MaxHealth    = 100f;
 
+        [Header("Knockback")]
+        [Tooltip("Applied to THIS character when it takes a hit. ExternalDecay is 8/s, " +
+                 "so a force F slides roughly F*F/16 units over F/8 seconds.")]
+        public float KnockbackForce = 4f;
+
+        [Tooltip("How long own input stays muted after a hit. Keep it below the slide duration.")]
+        public float KnockbackStunDuration = 0.15f;
+
         [Header("Sword Ring")]
         public int   SwordCount        = 3;
         public int   MaxSwordCount     = 12;
@@ -61,6 +69,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             MaxSwordCount        = Mathf.Max(MaxSwordCount, SwordCount);
             FlashDuration        = Mathf.Max(0.02f, FlashDuration);
+            KnockbackForce        = Mathf.Max(0f, KnockbackForce);
+            KnockbackStunDuration = Mathf.Max(0f, KnockbackStunDuration);
             RingSettleTime       = Mathf.Max(0.01f, RingSettleTime);
             RingEntryTime        = Mathf.Max(0.01f, RingEntryTime);
         }

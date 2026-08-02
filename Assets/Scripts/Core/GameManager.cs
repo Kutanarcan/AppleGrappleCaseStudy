@@ -17,6 +17,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [Header("Feedback")]
         [SerializeField] private FeedbackConfig _feedbackConfig;
         [SerializeField] private AudioSource _audioSource;
+        [SerializeField] private Camera _camera;
 
         [Header("Arena")]
         [SerializeField] private ArenaView _arenaView;
@@ -58,6 +59,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         private AudioManager _audio;
         private ParticleManager _particles;
+        private ScreenShakeEffect _screenShake;
         private GameFeedback _feedback;
 
         private void Awake()
@@ -97,7 +99,13 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _audio = new AudioManager(_audioSource);
             _particles = new ParticleManager(_feedbackConfig);
-            _feedback = new GameFeedback(_audio, _particles, _feedbackConfig);
+
+            Camera camera = _camera != null ? _camera : Camera.main;
+            if (camera == null)
+                Debug.LogWarning("GameManager: no camera assigned — screen shake is disabled.");
+
+            _screenShake = new ScreenShakeEffect(camera != null ? camera.transform : null);
+            _feedback = new GameFeedback(_audio, _particles, _screenShake, _feedbackConfig);
 
             _swordPool = new Pool<Sword>(
                 create: CreateSword,
@@ -139,6 +147,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _factory.Deinitialize();
             _collectibles.Deinitialize();   // flying bubbles return to the pool at once
             _particles.Deinitialize();      // no blood splash left on screen
+            _screenShake.Reset();           // camera must not stay parked at a shake offset
             _audio.Deinitialize();
             _characters.Deinitialize();
             _map.Deinitialize();
@@ -164,6 +173,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _input = null;
             _factory = null;
             _particles = null;
+            _screenShake = null;
             _audio = null;
             _feedback = null;
             _swordPool = null;

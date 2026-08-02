@@ -19,16 +19,18 @@ MonoBehaviour:
   Acceleration: 100
   Deceleration: 350
   MaxHealth: 100
-  SwordCount: 2
+  KnockbackForce: 6
+  KnockbackStunDuration: 0.2
+  SwordCount: 6
   MaxSwordCount: 36
   OrbitRadius: 2.25
-  OrbitAngularSpeed: 125
+  OrbitAngularSpeed: 150
   SwordDamage: 34
   RingSettleTime: 0.35
   RingEntryTime: 0.35
   HitClip: {fileID: 8300000, guid: 0c1ac8bb22a2048498a5ee26f88863b2, type: 3}
   HitVolume: 0.9
-  FlashColor: {r: 0, g: 1, b: 0.9505663, a: 1}
+  FlashColor: {r: 0.2783019, g: 1, b: 0.76509434, a: 1}
   FlashDuration: 0.14
   PerceptionRadius: 10
   DecisionInterval: 0.25

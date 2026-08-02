@@ -22,6 +22,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         // Root is the owning character — the top of the chain, not the sword itself.
         public IInteractionEntity Root => _owner;
 
+        /// <summary>Typed owner, so callers do not have to cast Root back to Character.</summary>
+        public Character Owner => _owner;
+
         public SwordState State { get; private set; }
         public SwordView View => _view;
 

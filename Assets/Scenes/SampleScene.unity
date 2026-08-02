@@ -712,6 +712,7 @@ MonoBehaviour:
   _collectiblePrefab: {fileID: 2278113969243520603, guid: 68b9446e618efc94280192d361e03f00, type: 3}
   _feedbackConfig: {fileID: 11400000, guid: 45fee817b50252c4abeec794edd4ebf6, type: 2}
   _audioSource: {fileID: 1863094907}
+  _camera: {fileID: 519420031}
   _arenaView: {fileID: 2054741028}
   _arenaWidth: 50
   _arenaHeight: 25
@@ -721,10 +722,10 @@ MonoBehaviour:
   _characterMargin: 2
   _randomMargin: 3
   _spawnSeed: 12345
-  _enemyCount: 3
+  _enemyCount: 7
   _collectibleSettings:
-    SpawnInterval: 2
-    MaxActive: 20
+    SpawnInterval: 0.2
+    MaxActive: 30
     SwordAmount: 1
   _collectiblePrewarm: 30
   _swordPrewarm: 48
