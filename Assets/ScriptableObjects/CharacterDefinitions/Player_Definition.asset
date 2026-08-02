@@ -19,22 +19,22 @@ MonoBehaviour:
   Acceleration: 100
   Deceleration: 350
   MaxHealth: 100
-  SwordCount: 15
+  SwordCount: 2
   MaxSwordCount: 36
   OrbitRadius: 2.25
   OrbitAngularSpeed: 125
   SwordDamage: 34
   RingSettleTime: 0.35
   RingEntryTime: 0.35
-  RingEntryRadiusScale: 2.5
   HitClip: {fileID: 8300000, guid: 0c1ac8bb22a2048498a5ee26f88863b2, type: 3}
   HitVolume: 0.9
   FlashColor: {r: 0, g: 1, b: 0.9505663, a: 1}
   FlashDuration: 0.14
-  AggroEnterRadius: 6
-  AggroExitRadius: 8
-  CollectibleSeekRadius: 12
-  SwordAdvantageMargin: 1
+  PerceptionRadius: 10
   DecisionInterval: 0.25
-  RoamRadius: 5
-  RoamRepathInterval: 2
+  WanderDuration: 3
+  WallLookAhead: 4
+  BodyRadius: 0.5
+  GoalWeight: 1
+  CommitWeight: 0.35
+  WallWeight: 0.8

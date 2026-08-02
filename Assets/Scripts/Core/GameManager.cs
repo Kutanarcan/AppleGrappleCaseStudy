@@ -11,53 +11,54 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [SerializeField] private CharacterDefinition _enemyDefinition;
 
         [Header("Prefabs")]
-        [SerializeField] private SwordView            _swordPrefab;
+        [SerializeField] private SwordView _swordPrefab;
         [SerializeField] private SwordCollectibleView _collectiblePrefab;
 
         [Header("Feedback")]
         [SerializeField] private FeedbackConfig _feedbackConfig;
-        [SerializeField] private AudioSource    _audioSource;
+        [SerializeField] private AudioSource _audioSource;
 
         [Header("Arena")]
         [SerializeField] private ArenaView _arenaView;
-        [SerializeField] private float _arenaWidth    = 22f;
-        [SerializeField] private float _arenaHeight   = 16f;
+        [SerializeField] private float _arenaWidth = 22f;
+        [SerializeField] private float _arenaHeight = 16f;
         [SerializeField] private float _wallThickness = 0.5f;
         [SerializeField] private float _arenaMarginOffset = 4f;
 
         [Header("Spawn")]
         [SerializeField] private float _minCharacterSeparation = 3.5f;
-        [SerializeField] private float _characterMargin        = 1.5f;
-        [SerializeField] private float _randomMargin           = 1.5f;
-        [SerializeField] private int   _spawnSeed              = 12345;
+        [SerializeField] private float _characterMargin = 1.5f;
+        [SerializeField] private float _randomMargin = 1.5f;
+        [SerializeField] private int _spawnSeed = 12345;
 
         [Header("Scene")]
         [SerializeField] private int _enemyCount = 8;
 
         [Header("Collectibles")]
-        [SerializeField] private SwordCollectibleSpawnSettings _collectibleSettings = new()
+        [SerializeField]
+        private SwordCollectibleSpawnSettings _collectibleSettings = new()
         {
             SpawnInterval = 3f,
-            MaxActive     = 6,
-            SwordAmount   = 1
+            MaxActive = 6,
+            SwordAmount = 1
         };
         [SerializeField] private int _collectiblePrewarm = 8;
 
         [Header("Pooling")]
         [SerializeField] private int _swordPrewarm = 48;
 
-        private PlayerInput         _input;
-        private Arena               _arena;
-        private SpawnMap            _map;
-        private CharacterRegistry   _characters;
-        private CharacterFactory    _factory;
-        private Pool<Sword>         _swordPool;
+        private PlayerInput _input;
+        private Arena _arena;
+        private SpawnMap _map;
+        private CharacterRegistry _characters;
+        private CharacterFactory _factory;
+        private Pool<Sword> _swordPool;
         private InteractionResolver _resolver;
         private SwordCollectibleSpawner _collectibles;
 
-        private AudioManager    _audio;
+        private AudioManager _audio;
         private ParticleManager _particles;
-        private GameFeedback    _feedback;
+        private GameFeedback _feedback;
 
         private void Awake()
         {
@@ -85,21 +86,21 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             DOTween.Init(recycleAllByDefault: false, useSafeMode: true, LogBehaviour.ErrorsOnly)
                    .SetCapacity(tweenersCapacity: 200, sequencesCapacity: 50);
 
-            _input      = new PlayerInput();
+            _input = new PlayerInput();
 
             // Arena first: ground/mask are sized, the fence is spawned, Min/Max become known
-            _arena      = new Arena(_arenaView, _arenaWidth, _arenaHeight, _wallThickness, _arenaMarginOffset);
-            _map        = new SpawnMap(_arena, _spawnSeed,
+            _arena = new Arena(_arenaView, _arenaWidth, _arenaHeight, _wallThickness, _arenaMarginOffset);
+            _map = new SpawnMap(_arena, _spawnSeed,
                                        _minCharacterSeparation, _characterMargin, _randomMargin);
             _characters = new CharacterRegistry();
-            _resolver   = new InteractionResolver();
+            _resolver = new InteractionResolver();
 
-            _audio     = new AudioManager(_audioSource);
+            _audio = new AudioManager(_audioSource);
             _particles = new ParticleManager(_feedbackConfig);
-            _feedback  = new GameFeedback(_audio, _particles, _feedbackConfig);
+            _feedback = new GameFeedback(_audio, _particles, _feedbackConfig);
 
             _swordPool = new Pool<Sword>(
-                create:  CreateSword,
+                create: CreateSword,
                 destroy: sword => Destroy(sword.View.gameObject),
                 prewarm: _swordPrewarm);
 
@@ -112,7 +113,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _factory = new CharacterFactory(_characters, _map, _input, _swordPool, _resolver,
                                             _feedback, _feedbackConfig,
-                                            _playerDefinition, _enemyDefinition, _enemyCount);
+                                            _playerDefinition, _enemyDefinition, _enemyCount, _collectibles, _arena);
         }
 
         private Sword CreateSword()
@@ -160,16 +161,16 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _input?.Disable();
             _input?.Dispose();
 
-            _input      = null;
-            _factory    = null;
-            _particles  = null;
-            _audio      = null;
-            _feedback   = null;
-            _swordPool  = null;
-            _resolver   = null;
+            _input = null;
+            _factory = null;
+            _particles = null;
+            _audio = null;
+            _feedback = null;
+            _swordPool = null;
+            _resolver = null;
             _characters = null;
-            _map        = null;
-            _arena      = null;
+            _map = null;
+            _arena = null;
             _collectibles = null;
         }
 

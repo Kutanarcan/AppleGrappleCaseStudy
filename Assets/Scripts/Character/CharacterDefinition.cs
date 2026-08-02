@@ -45,14 +45,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public Color FlashColor    = Color.red;
         public float FlashDuration = 0.14f;
 
-        [Header("AI (used when BrainType = AI)")]
-        public float AggroEnterRadius      = 6f;
-        public float AggroExitRadius       = 8f;
-        public float CollectibleSeekRadius = 12f;
-        public int   SwordAdvantageMargin  = 1;
-        public float DecisionInterval      = 0.25f;
-        public float RoamRadius            = 5f;
-        public float RoamRepathInterval    = 2f;
+        [Header("AI")]
+        public float PerceptionRadius = 10f;
+        public float DecisionInterval = 0.25f;
+        public float WanderDuration = 3f;
+        public float WallLookAhead = 4f;
+        public float BodyRadius = 0.5f;
+
+        [Header("AI Weights")]
+        public float GoalWeight = 1.0f;
+        public float CommitWeight = 0.35f;
+        public float WallWeight = 0.8f;
 
         private void OnValidate()
         {
@@ -60,8 +63,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             FlashDuration        = Mathf.Max(0.02f, FlashDuration);
             RingSettleTime       = Mathf.Max(0.01f, RingSettleTime);
             RingEntryTime        = Mathf.Max(0.01f, RingEntryTime);
-            AggroExitRadius      = Mathf.Max(AggroExitRadius, AggroEnterRadius);
-            SwordAdvantageMargin = Mathf.Max(1, SwordAdvantageMargin);
         }
     }
 }

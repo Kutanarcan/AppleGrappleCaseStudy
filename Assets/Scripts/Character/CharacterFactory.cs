@@ -6,15 +6,16 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 {
     public sealed class CharacterFactory : IDisposable
     {
-        private readonly CharacterRegistry   _registry;
-        private readonly SpawnMap            _map;
-        private readonly PlayerInput         _input;
-        private readonly Pool<Sword>         _swordPool;
+        private readonly CharacterRegistry _registry;
+        private readonly SpawnMap _map;
+        private readonly PlayerInput _input;
+        private readonly Pool<Sword> _swordPool;
         private readonly InteractionResolver _resolver;
-        private readonly IGameFeedback       _feedback;
-        private readonly FeedbackConfig      _feedbackConfig;
-        private readonly List<Character>     _enemies = new(32);
-
+        private readonly IGameFeedback _feedback;
+        private readonly FeedbackConfig _feedbackConfig;
+        private readonly List<Character> _enemies = new(32);
+        private readonly SwordCollectibleSpawner _collectibles;
+        private readonly Arena _arena;
         private Character _player;
 
         // ================= CREATE =================
@@ -24,15 +25,18 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                                 InteractionResolver resolver,
                                 IGameFeedback feedback, FeedbackConfig feedbackConfig,
                                 CharacterDefinition playerDefinition,
-                                CharacterDefinition enemyDefinition, int enemyCount)
+                                CharacterDefinition enemyDefinition, int enemyCount, SwordCollectibleSpawner collectibles, Arena arena)
+
         {
-            _registry       = registry;
-            _map            = map;
-            _input          = input;
-            _swordPool      = swordPool;
-            _resolver       = resolver;
-            _feedback       = feedback;
+            _registry = registry;
+            _map = map;
+            _input = input;
+            _swordPool = swordPool;
+            _resolver = resolver;
+            _feedback = feedback;
             _feedbackConfig = feedbackConfig;
+            _collectibles = collectibles;
+            _arena = arena;
 
             _player = CreateCharacter(playerDefinition);
 
@@ -61,6 +65,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             {
                 case CharacterBrainType.Player:
                     return new PlayerInputDirectionProvider(_input.Player.Move);
+
+                case CharacterBrainType.AI:
+                    return new AngleAIDirectionProvider(self, _arena, _registry, _collectibles);
+                //return new SimpleAIDirectionProvider(self, _arena, _collectibles, definition);
 
                 default:
                     return NullDirectionProvider.Instance;
