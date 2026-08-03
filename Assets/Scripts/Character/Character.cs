@@ -14,6 +14,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private readonly IGameFeedback       _feedback;
         private readonly FlashEffect         _flash;
         private readonly HealthBarEffect     _healthBar;
+        private readonly IScratchPainter     _scratch;
 
         private IDirectionProvider _directionProvider;
         private float _health;
@@ -44,12 +45,14 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         // ================= CREATE =================
         public Character(CharacterView view, CharacterDefinition definition,
-                         InteractionResolver resolver, IGameFeedback feedback)
+                         InteractionResolver resolver, IGameFeedback feedback,
+                         IScratchPainter scratch)
         {
             _view       = view;
             _definition = definition;
             _resolver   = resolver;
             _feedback   = feedback;
+            _scratch    = scratch ?? NullScratchPainter.Instance;
             _flash      = new FlashEffect(view.Sprite);
             _healthBar  = new HealthBarEffect(view.HealthBar);
 
@@ -119,6 +122,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                 _abilities[i].Update(deltaTime);
 
             _animation.Update(Movement.Velocity);
+
+            // The view transform, not Body.position: the body is interpolated, so the
+            // transform is what the eye actually sees. The mark has to line up with it.
+            if (_definition.ScratchBrushSize > 0f)
+                _scratch.Paint(_view.transform.position, _definition.ScratchBrushSize);
         }
 
         public void FixedUpdate(float deltaTime)

@@ -17,6 +17,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private readonly SwordCollectibleSpawner _collectibles;
         private readonly Arena _arena;
         private readonly IdentityPool _identities;
+        private readonly IScratchPainter _scratch;
         private Character _player;
 
         // ================= CREATE =================
@@ -27,7 +28,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                                 IGameFeedback feedback, FeedbackConfig feedbackConfig,
                                 CharacterDefinition playerDefinition,
                                 CharacterDefinition enemyDefinition, int enemyCount, SwordCollectibleSpawner collectibles, Arena arena,
-                                IdentityPool identities)
+                                IdentityPool identities, IScratchPainter scratch)
 
         {
             _registry = registry;
@@ -40,6 +41,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _collectibles = collectibles;
             _arena = arena;
             _identities = identities;
+            _scratch = scratch ?? NullScratchPainter.Instance;
 
             _player = CreateCharacter(playerDefinition);
 
@@ -51,13 +53,13 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             CharacterView view = UnityEngine.Object.Instantiate(definition.ViewPrefab);
 
-            var character = new Character(view, definition, _resolver, _feedback);
+            var character = new Character(view, definition, _resolver, _feedback, _scratch);
 
             // The provider may reference the character → character first, then provider
             character.SetDirectionProvider(CreateProvider(definition, character));
 
             if (definition.HasSwordRing)
-                character.AddAbility(new SwordRingAbility(_swordPool, _feedbackConfig));
+                character.AddAbility(new SwordRingAbility(_swordPool, _feedbackConfig, _scratch));
 
             return character;
         }

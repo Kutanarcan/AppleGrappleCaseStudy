@@ -39,15 +39,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private readonly List<Sword>     _detached = new(4);
         private readonly Pool<Sword>     _pool;
         private readonly FeedbackConfig  _config;
+        private readonly IScratchPainter _scratch;
 
         private Character _owner;
         private float _phase;
         private float _targetPhase;      // global rotation that keeps every settle forward
 
-        public SwordRingAbility(Pool<Sword> pool, FeedbackConfig config)
+        public SwordRingAbility(Pool<Sword> pool, FeedbackConfig config, IScratchPainter scratch)
         {
-            _pool   = pool;
-            _config = config;
+            _pool    = pool;
+            _config  = config;
+            _scratch = scratch ?? NullScratchPainter.Instance;
         }
 
         public int ActiveSwordCount => _slots.Count;
@@ -64,7 +66,21 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             SnapAll();          // no spiral at round start — a retry must look identical
         }
 
-        public void Update(float deltaTime) { }
+        /// <summary>
+        /// Swords carve the ground as they orbit. Here and not in FixedUpdate: one mark
+        /// per sword per FRAME, so the trail density does not follow the physics rate.
+        ///
+        /// _slots only ever holds swords still in the ring — a thrown one moves to
+        /// _detached — so "in-flight swords leave no trail" needs no extra check.
+        /// </summary>
+        public void Update(float deltaTime)
+        {
+            float brush = _owner.Definition.SwordScratchBrushSize;
+            if (brush <= 0f) return;
+
+            for (int i = 0; i < _slots.Count; i++)
+                _scratch.Paint(_slots[i].Sword.View.transform.position, brush);
+        }
 
         // ================= TICK =================
         public void FixedUpdate(float deltaTime)

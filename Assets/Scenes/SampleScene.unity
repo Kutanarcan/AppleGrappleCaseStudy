@@ -714,6 +714,7 @@ MonoBehaviour:
   _audioSource: {fileID: 1863094907}
   _camera: {fileID: 519420031}
   _flagCatalog: {fileID: 11400000, guid: 79203a85f180eec4c971f55e8015f721, type: 2}
+  _scratchPainter: {fileID: 2098680949}
   _arenaView: {fileID: 2054741028}
   _arenaConfig: {fileID: 11400000, guid: 7a3e1c48b5d2409f8e6a1b7c2d4f5f01, type: 2}
   _spawnConfig: {fileID: 11400000, guid: 7a3e1c48b5d2409f8e6a1b7c2d4f5f02, type: 2}
@@ -1290,10 +1291,17 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 231690978}
+    - target: {fileID: 114877032501962244, guid: bfd21db4576fb4dac871b93fdc37924b, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 137284, guid: bfd21db4576fb4dac871b93fdc37924b, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 2098680949}
   m_SourcePrefab: {fileID: 100100000, guid: bfd21db4576fb4dac871b93fdc37924b, type: 3}
 --- !u!4 &2098680945 stripped
 Transform:
@@ -1305,6 +1313,35 @@ SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 21281386, guid: bfd21db4576fb4dac871b93fdc37924b, type: 3}
   m_PrefabInstance: {fileID: 2098680944}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2098680947 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 137284, guid: bfd21db4576fb4dac871b93fdc37924b, type: 3}
+  m_PrefabInstance: {fileID: 2098680944}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2098680948 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 11486244, guid: bfd21db4576fb4dac871b93fdc37924b, type: 3}
+  m_PrefabInstance: {fileID: 2098680944}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2098680947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1091e69478f334e5c995b30d9b122da3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2098680949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2098680947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dadf1d46dce90d418b015bcb1f0173f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _card: {fileID: 2098680948}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

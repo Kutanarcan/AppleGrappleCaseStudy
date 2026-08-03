@@ -57,6 +57,13 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                  "read the loss, short enough to finish before the next hit.")]
         public float HealthBarDrainTime = 0.25f;
 
+        [Header("Scratch")]
+        [Tooltip("Brush radius this character carves into the ground. 0 disables it.")]
+        public float ScratchBrushSize = 1.5f;
+
+        [Tooltip("Brush radius each orbiting sword carves. 0 disables it.")]
+        public float SwordScratchBrushSize = 0.6f;
+
         [Header("AI")]
         public float PerceptionRadius = 10f;
         public float DecisionInterval = 0.25f;
@@ -74,6 +81,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             MaxSwordCount        = Mathf.Max(MaxSwordCount, SwordCount);
             FlashDuration        = Mathf.Max(0.02f, FlashDuration);
             HealthBarDrainTime   = Mathf.Max(0f, HealthBarDrainTime);
+            ScratchBrushSize      = Mathf.Max(0f, ScratchBrushSize);
+            SwordScratchBrushSize = Mathf.Max(0f, SwordScratchBrushSize);
             KnockbackForce        = Mathf.Max(0f, KnockbackForce);
             KnockbackStunDuration = Mathf.Max(0f, KnockbackStunDuration);
             RingSettleTime       = Mathf.Max(0.01f, RingSettleTime);

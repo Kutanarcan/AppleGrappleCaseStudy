@@ -22,6 +22,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [Header("Identity")]
         [SerializeField] private FlagCatalog _flagCatalog;
 
+        [Header("Scratch")]
+        [Tooltip("Any component implementing IScratchPainter — ScratchPainterBehaviour. " +
+                 "Untyped because that adapter lives outside this assembly. Optional.")]
+        [SerializeField] private MonoBehaviour _scratchPainter;
+
         [Header("Arena")]
         [SerializeField] private ArenaView _arenaView;
         [SerializeField] private ArenaConfig _arenaConfig;
@@ -49,6 +54,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private SwordCollectibleSpawner _collectibles;
         private PropSpawner _props;
         private IdentityPool _identities;
+        private IScratchPainter _scratch;
 
         private AudioManager _audio;
         private ParticleManager _particles;
@@ -117,10 +123,18 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _identities = new IdentityPool(_flagCatalog);
 
+            // Optional: no painter just means no ground trail, the game still runs.
+            _scratch = _scratchPainter as IScratchPainter;
+            if (_scratchPainter != null && _scratch == null)
+                Debug.LogWarning($"GameManager: {_scratchPainter.GetType().Name} does not " +
+                                 "implement IScratchPainter — the scratch trail is off.", this);
+
+            _scratch ??= NullScratchPainter.Instance;
+
             _factory = new CharacterFactory(_characters, _map, _input, _swordPool, _resolver,
                                             _feedback, _feedbackConfig,
                                             _playerDefinition, _enemyDefinition, _spawnConfig.EnemyCount, _collectibles, _arena,
-                                            _identities);
+                                            _identities, _scratch);
         }
 
         private Sword CreateSword()
@@ -148,7 +162,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _collectibles.Deinitialize();  
             _props.Deinitialize();
             _particles.Deinitialize();     
-            _screenShake.Reset();          
+            _screenShake.Reset();
+            _scratch.ClearAll();            // R restarts the round — the ground starts blank
             _audio.Deinitialize();
             _characters.Deinitialize();
             _map.Deinitialize();
@@ -173,6 +188,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _factory = null;
             _particles = null;
             _screenShake = null;
+            _scratch = null;
             _audio = null;
             _feedback = null;
             _swordPool = null;
