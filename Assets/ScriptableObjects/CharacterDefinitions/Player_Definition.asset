@@ -21,7 +21,7 @@ MonoBehaviour:
   MaxHealth: 100
   KnockbackForce: 6
   KnockbackStunDuration: 0.2
-  SwordCount: 6
+  SwordCount: 3
   MaxSwordCount: 36
   OrbitRadius: 2.25
   OrbitAngularSpeed: 150
@@ -32,11 +32,6 @@ MonoBehaviour:
   HitVolume: 0.9
   FlashColor: {r: 0.2783019, g: 1, b: 0.76509434, a: 1}
   FlashDuration: 0.14
-  PerceptionRadius: 10
-  DecisionInterval: 0.25
-  WanderDuration: 3
-  WallLookAhead: 4
-  BodyRadius: 0.5
-  GoalWeight: 1
-  CommitWeight: 0.35
-  WallWeight: 0.8
+  HealthBarDrainTime: 0.25
+  ScratchBrushSize: 1.5
+  SwordScratchBrushSize: 0.75

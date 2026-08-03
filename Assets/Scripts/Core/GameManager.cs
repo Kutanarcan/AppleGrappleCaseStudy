@@ -61,14 +61,24 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private ScreenShakeEffect _screenShake;
         private GameFeedback _feedback;
 
+        private bool _quitting;
+
         private void Awake()
         {
             Compose();
             Initialize();
         }
 
+        private void OnApplicationQuit() => _quitting = true;
+
         private void OnDestroy()
         {
+            // Play mode is ending: Unity already destroyed the scene objects in its own
+            // order, so every reset below would reach through a dead reference. And there
+            // is nothing to clean up — the teardown exists to serve the ROSTER (do not
+            // respawn tinted red, half-drained, stunned), which has no next round here.
+            if (_quitting) return;
+
             Deinitialize();
             Dispose();
         }

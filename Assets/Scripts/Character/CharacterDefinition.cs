@@ -64,18 +64,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [Tooltip("Brush radius each orbiting sword carves. 0 disables it.")]
         public float SwordScratchBrushSize = 0.6f;
 
-        [Header("AI")]
-        public float PerceptionRadius = 10f;
-        public float DecisionInterval = 0.25f;
-        public float WanderDuration = 3f;
-        public float WallLookAhead = 4f;
-        public float BodyRadius = 0.5f;
-
-        [Header("AI Weights")]
-        public float GoalWeight = 1.0f;
-        public float CommitWeight = 0.35f;
-        public float WallWeight = 0.8f;
-
         private void OnValidate()
         {
             MaxSwordCount        = Mathf.Max(MaxSwordCount, SwordCount);
