@@ -6,7 +6,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
     {
         Player,
         AI,
-        None        // training dummy, fixed target
+        None
     }
 
     [CreateAssetMenu(menuName = "Game/Character Definition")]
@@ -20,61 +20,48 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public bool HasSwordRing = true;
 
         [Header("Movement")]
-        public float MoveSpeed    = 5f;
+        public float MoveSpeed = 5f;
         public float Acceleration = 40f;
         public float Deceleration = 60f;
-        public float MaxHealth    = 100f;
+        public float MaxHealth = 100f;
 
         [Header("Knockback")]
-        [Tooltip("Applied to THIS character when it takes a hit. ExternalDecay is 8/s, " +
-                 "so a force F slides roughly F*F/16 units over F/8 seconds.")]
         public float KnockbackForce = 4f;
-
-        [Tooltip("How long own input stays muted after a hit. Keep it below the slide duration.")]
         public float KnockbackStunDuration = 0.15f;
 
         [Header("Sword Ring")]
-        public int   SwordCount        = 3;
-        public int   MaxSwordCount     = 12;
-        public float OrbitRadius       = 1.5f;
+        public int SwordCount = 3;
+        public int MaxSwordCount = 12;
+        public float OrbitRadius = 1.5f;
         public float OrbitAngularSpeed = 120f;
-        public float SwordDamage       = 10f;
+        public float SwordDamage = 10f;
 
         [Header("Sword Ring — Interpolation")]
-        [Tooltip("How long the remaining swords take to slide into their new slots after one is lost.")]
         public float RingSettleTime = 0.18f;
-
-        [Tooltip("How long a new sword takes to grow from zero to full size.")]
         public float RingEntryTime = 0.35f;
 
         [Header("Feedback")]
-        public AudioClip HitClip;                       // PlayerHit / EnemyHit
+        public AudioClip HitClip;
         [Range(0f, 1f)] public float HitVolume = 0.9f;
-        public Color FlashColor    = Color.red;
+        public Color FlashColor = Color.red;
         public float FlashDuration = 0.14f;
-
-        [Tooltip("How long the health bar takes to slide to the new value. Long enough to " +
-                 "read the loss, short enough to finish before the next hit.")]
         public float HealthBarDrainTime = 0.25f;
 
         [Header("Scratch")]
-        [Tooltip("Brush radius this character carves into the ground. 0 disables it.")]
         public float ScratchBrushSize = 1.5f;
-
-        [Tooltip("Brush radius each orbiting sword carves. 0 disables it.")]
         public float SwordScratchBrushSize = 0.6f;
 
         private void OnValidate()
         {
-            MaxSwordCount        = Mathf.Max(MaxSwordCount, SwordCount);
-            FlashDuration        = Mathf.Max(0.02f, FlashDuration);
-            HealthBarDrainTime   = Mathf.Max(0f, HealthBarDrainTime);
-            ScratchBrushSize      = Mathf.Max(0f, ScratchBrushSize);
+            MaxSwordCount = Mathf.Max(MaxSwordCount, SwordCount);
+            FlashDuration = Mathf.Max(0.02f, FlashDuration);
+            HealthBarDrainTime = Mathf.Max(0f, HealthBarDrainTime);
+            ScratchBrushSize = Mathf.Max(0f, ScratchBrushSize);
             SwordScratchBrushSize = Mathf.Max(0f, SwordScratchBrushSize);
-            KnockbackForce        = Mathf.Max(0f, KnockbackForce);
+            KnockbackForce = Mathf.Max(0f, KnockbackForce);
             KnockbackStunDuration = Mathf.Max(0f, KnockbackStunDuration);
-            RingSettleTime       = Mathf.Max(0.01f, RingSettleTime);
-            RingEntryTime        = Mathf.Max(0.01f, RingEntryTime);
+            RingSettleTime = Mathf.Max(0.01f, RingSettleTime);
+            RingEntryTime = Mathf.Max(0.01f, RingEntryTime);
         }
     }
 }

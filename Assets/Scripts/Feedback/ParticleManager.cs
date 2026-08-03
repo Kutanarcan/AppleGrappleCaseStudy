@@ -16,22 +16,22 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private sealed class Entry
         {
             public ParticleView View;
-            public ParticleId   Id;
+            public ParticleType   Id;
             public float        Remaining;
         }
 
-        private readonly Dictionary<ParticleId, Pool<ParticleView>> _pools = new(2);
+        private readonly Dictionary<ParticleType, Pool<ParticleView>> _pools = new(2);
         private readonly List<Entry> _active = new(32);
         private readonly List<Entry> _sweep  = new(8);
 
         // ================= CREATE =================
         public ParticleManager(FeedbackConfig config)
         {
-            AddPool(ParticleId.BloodSplash, config.BloodSplashPrefab, config.ParticlePrewarm);
-            AddPool(ParticleId.SwordClash,  config.SwordClashPrefab,  config.ParticlePrewarm);
+            AddPool(ParticleType.BloodSplash, config.BloodSplashPrefab, config.ParticlePrewarm);
+            AddPool(ParticleType.SwordClash,  config.SwordClashPrefab,  config.ParticlePrewarm);
         }
 
-        private void AddPool(ParticleId id, ParticleView prefab, int prewarm)
+        private void AddPool(ParticleType id, ParticleView prefab, int prewarm)
         {
             if (prefab == null)
             {
@@ -53,7 +53,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         // ================= INITIALIZE =================
         public void Initialize() => _active.Clear();
 
-        public void Play(ParticleId id, Vector2 position, float rotationDeg = 0f)
+        public void Play(ParticleType id, Vector2 position, float rotationDeg = 0f)
         {
             if (!_pools.TryGetValue(id, out Pool<ParticleView> pool)) return;
 

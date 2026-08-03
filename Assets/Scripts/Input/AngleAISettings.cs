@@ -1,28 +1,20 @@
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    /// <summary>
-    /// Tuning values live here, not on CharacterDefinition, so this provider can be
-    /// tested in isolation before anything is exposed to the inspector.
-    /// </summary>
     public struct AngleAISettings
     {
         public float PerceptionRadius;
         public float DecisionInterval;
 
-        /// <summary>How far ahead the wall probe looks. Keep small (1-3).</summary>
         public float WallLookAhead;
         public float BodyRadius;
 
-        /// <summary>Half-angle, in degrees, banned around every stronger enemy.</summary>
         public float ThreatCone;
 
         public float PreyWeight;
         public float PickupWeight;
 
-        /// <summary>Keeps the current heading. This is what wandering IS - no separate mode.</summary>
         public float CommitWeight;
 
-        /// <summary>Prefers angles that end up far from a wall. Zero effect in open space.</summary>
         public float OpennessWeight;
 
         public float OpennessLookAhead;

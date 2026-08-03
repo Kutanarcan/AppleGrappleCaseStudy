@@ -73,7 +73,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public void Update(float deltaTime)
         {
             _timer -= deltaTime;
-            if (_timer > 0f) return;
+
+            if (_timer > 0f)
+                return;
 
             _timer = _settings.DecisionInterval;
 
@@ -97,9 +99,12 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             for (int i = 0; i < active.Count; i++)
             {
                 Character other = active[i];
-                if (other == _self || !other.IsAlive) continue;
 
-                if (!TryDescribe(position, other.Position, radius, out Attractor attractor)) continue;
+                if (other == _self || !other.IsAlive)
+                    continue;
+
+                if (!TryDescribe(position, other.Position, radius, out Attractor attractor))
+                    continue;
 
                 int theirs = other.Stats.SwordCount;
 
@@ -114,8 +119,12 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             }
 
             SwordCollectible pickup = _collectibles.FindNearest(position, radius);
-            if (pickup != null && TryDescribe(position, pickup.Position, radius, out Attractor p))
+
+            if (pickup != null &&
+                TryDescribe(position, pickup.Position, radius, out Attractor p))
+            {
                 _pickups.Add(p);
+            }
         }
 
         private static bool TryDescribe(Vector2 from, Vector2 to, float radius, out Attractor attractor)
@@ -125,9 +134,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             Vector2 delta = to - from;
             float distance = delta.magnitude;
 
-            if (distance < 0.0001f || distance > radius) return false;
+            if (distance < 0.0001f || distance > radius)
+                return false;
 
             attractor = new Attractor(delta / distance, 1f - distance / radius);
+
             return true;
         }
 
@@ -147,7 +158,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                 Vector2 angle = Angles[i];
                 Vector2 probe = position + angle * _settings.WallLookAhead;
 
-                if (!Inside(probe)) continue;
+                if (!Inside(probe))
+                    continue;
 
                 float threat = MaxAlignment(_threats, angle);
 
@@ -155,21 +167,27 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
                 if (threat > coneLimit)
                 {
-                    if (threat >= lowestThreat) continue;
+                    if (threat >= lowestThreat)
+                        continue;
 
                     lowestThreat = threat;
                     fallback = i;
+
                     continue;
                 }
 
-                if (score <= bestScore) continue;
+                if (score <= bestScore)
+                    continue;
 
                 bestScore = score;
                 best = i;
             }
 
-            if (best >= 0) return Angles[best];
-            if (fallback >= 0) return Angles[fallback];
+            if (best >= 0)
+                return Angles[best];
+
+            if (fallback >= 0)
+                return Angles[fallback];
 
             return (_arena.Center - position).normalized;
         }
@@ -196,7 +214,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             for (int i = 0; i < attractors.Count; i++)
             {
                 float alignment = Vector2.Dot(angle, attractors[i].Direction);
-                if (alignment <= 0f) continue;                 // behind us, no pull
+
+                if (alignment <= 0f)
+                    continue;
 
                 total += alignment * attractors[i].Closeness;
             }
@@ -204,7 +224,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             return total;
         }
 
-        /// <summary>How directly this angle points at the worst threat. 1 = straight at it.</summary>
         private static float MaxAlignment(List<Attractor> attractors, Vector2 angle)
         {
             float worst = -1f;
@@ -215,7 +234,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
                 alignment *= attractors[i].Closeness;
 
-                if (alignment > worst) worst = alignment;
+                if (alignment > worst)
+                    worst = alignment;
             }
 
             return worst;
@@ -246,10 +266,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             float distance = Vector2.Distance(from, targetPosition);
 
-            // -1 outside the ring (close in), +1 inside it (back off), 0 exactly on it.
             float radial = Mathf.Clamp((_settings.EngageRadius - distance) / _settings.EngageBand, -1f, 1f);
 
-            // Tangent strength peaks ON the ring and fades as we approach or retreat.
             float tangential = 1f - Mathf.Abs(radial);
 
             Vector2 inward = raw.Direction;

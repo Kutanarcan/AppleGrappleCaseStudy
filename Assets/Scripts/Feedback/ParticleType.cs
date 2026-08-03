@@ -1,6 +1,6 @@
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    public enum ParticleId
+    public enum ParticleType
     {
         BloodSplash,
         SwordClash

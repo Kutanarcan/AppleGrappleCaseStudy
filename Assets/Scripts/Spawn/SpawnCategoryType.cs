@@ -1,6 +1,6 @@
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    public enum SpawnCategory
+    public enum SpawnCategoryType
     {
         Player,
         Enemy,

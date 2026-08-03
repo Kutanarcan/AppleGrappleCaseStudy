@@ -3,10 +3,6 @@ using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    /// <summary>
-    /// Arena geometry. Given a width/height it sizes the ground and mask and spawns
-    /// the fence. Center / Min / Max are the shared reference for everyone else.
-    /// </summary>
     public sealed class Arena : IDisposable
     {
         private readonly ArenaBorderSpawner _border;
@@ -17,7 +13,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public Vector2 Min    { get; }
         public Vector2 Max    { get; }
 
-        /// <summary>CREATE phase — sizing and fence spawning happen here.</summary>
         public Arena(ArenaView view, float width, float height, float wallThickness, float offset)
         {
             Width  = Mathf.Max(1f, width);
@@ -37,7 +32,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             return new Vector2(
                 Mathf.Clamp(point.x, Min.x + margin, Max.x - margin),
-                Mathf.Clamp(point.y, Min.y + margin, Max.y - margin));
+                Mathf.Clamp(point.y, Min.y + margin, Max.y - margin)
+                );
         }
 
         public bool Contains(Vector2 point, float margin = 0f)

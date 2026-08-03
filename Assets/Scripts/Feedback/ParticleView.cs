@@ -2,23 +2,23 @@ using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    /// <summary>
-    /// Dumb MonoBehaviour. Prefab settings:
-    ///   Play On Awake = false, Looping = false, Stop Action = None
-    /// </summary>
     [RequireComponent(typeof(ParticleSystem))]
     public sealed class ParticleView : MonoBehaviour
     {
         [SerializeField] private ParticleSystem _system;
 
-        /// <summary>Total lifetime of the effect — decides when it returns to the pool.</summary>
         public float Duration { get; private set; }
 
-        private void Reset() => _system = GetComponent<ParticleSystem>();
+        private void Reset()
+        {
+            _system = GetComponent<ParticleSystem>();
+        }
 
         private void Awake()
         {
-            if (_system == null) _system = GetComponent<ParticleSystem>();
+            if (_system == null)
+                _system = GetComponent<ParticleSystem>();
+
             CacheDuration();
         }
 

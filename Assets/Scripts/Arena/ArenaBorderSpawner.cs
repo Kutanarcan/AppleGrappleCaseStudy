@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    /// <summary>
-    /// Computes how many fence pieces fit along each edge and places them.
-    /// Runs once in the CREATE phase, stays put until Dispose.
-    /// </summary>
     public sealed class ArenaBorderSpawner : IDisposable
     {
         private readonly List<GameObject> _pieces = new(256);
@@ -18,7 +14,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             Transform root = view.BorderRoot;
 
-            // --- Corner posts ---
             float inset = HalfWidth(view.CornerPrefab);
 
             Place(view.CornerPrefab, new Vector2(arena.Min.x, arena.Max.y), root);
@@ -26,13 +21,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             Place(view.CornerPrefab, new Vector2(arena.Min.x, arena.Min.y), root);
             Place(view.CornerPrefab, new Vector2(arena.Max.x, arena.Min.y), root);
 
-            // --- Horizontal edges (top / bottom) ---
             FillEdge(view.HorizontalPrefab, root,
                      arena.Min.x + inset, arena.Max.x - inset, arena.Max.y, horizontal: true);
             FillEdge(view.HorizontalPrefab, root,
                      arena.Min.x + inset, arena.Max.x - inset, arena.Min.y, horizontal: true);
 
-            // --- Vertical edges (left / right) ---
             float vInset = HalfHeight(view.CornerPrefab);
 
             FillEdge(view.VerticalPrefab, root,
@@ -41,10 +34,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                      arena.Min.y + vInset, arena.Max.y - vInset, arena.Max.x, horizontal: false);
         }
 
-        /// <summary>
-        /// Counts pieces from the piece size, then re-divides the span so it is filled
-        /// EXACTLY — no gap or overflow at the edge.
-        /// </summary>
         private void FillEdge(SpriteRenderer prefab, Transform root,
                               float from, float to, float fixedCoord, bool horizontal)
         {

@@ -4,10 +4,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 {
     public sealed class CharacterRegistry
     {
-        private readonly List<Character> _active  = new(64);
+        private readonly List<Character> _active = new(64);
         private readonly List<Character> _pending = new(8);
 
-        public IReadOnlyList<Character> Active         => _active;
+        public IReadOnlyList<Character> Active => _active;
         public IReadOnlyList<Character> PendingRemoval => _pending;
 
         public void Add(Character character)
@@ -24,7 +24,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         private void OnDied(Character character)
         {
-            if (_pending.Contains(character)) return;   // double death signal in the same step
+            if (_pending.Contains(character)) return;
             _pending.Add(character);
         }
 

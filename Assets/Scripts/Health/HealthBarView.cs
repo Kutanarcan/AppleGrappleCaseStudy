@@ -3,13 +3,6 @@ using UnityEngine.Serialization;
 
 namespace LoopGamesCaseStudy.AppleGrappleClone
 {
-    /// <summary>
-    /// Drives _FillAmount on the fill sprite's material. Dumb holder — it renders a
-    /// number someone else decided. Animation lives in <see cref="HealthBarEffect"/>.
-    ///
-    /// A MaterialPropertyBlock instead of a material instance: every character shares
-    /// one material, so no per-instance material is allocated.
-    /// </summary>
     public sealed class HealthBarView : MonoBehaviour
     {
         public enum FillDirection { LeftToRight = 0, RightToLeft = 1, BottomToTop = 2, TopToBottom = 3 }
@@ -23,8 +16,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [SerializeField, Range(0f, 0.1f), FormerlySerializedAs("softEdge")]
         private float _softEdge = 0f;
 
-        // Bands, not a gradient: a hard switch is a clearer read than sliding through
-        // the muddy olive/orange hues that sit between these three.
         [Header("Tint bands")]
         [SerializeField] private Color _highColor = new(0.44f, 0.78f, 0.42f);   // 100-67%
         [SerializeField] private Color _midColor  = new(0.93f, 0.80f, 0.35f);   //  66-34%
@@ -51,14 +42,13 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             Apply();
         }
 
-        /// <summary>Lets the band colors be tuned live in the inspector.</summary>
-        private void OnValidate() => Apply();
-
         private void Apply()
         {
-            // OnValidate can run before Awake, so the refs are resolved here, not there.
-            if (_sprite == null) _sprite = GetComponent<SpriteRenderer>();
-            if (_sprite == null) return;
+            if (_sprite == null)
+                _sprite = GetComponent<SpriteRenderer>();
+
+            if (_sprite == null)
+                return;
 
             _block ??= new MaterialPropertyBlock();
 
@@ -72,7 +62,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         private Color BandColor(float fill)
         {
-            if (fill >= HighBandFloor) return _highColor;
+            if (fill >= HighBandFloor)
+                return _highColor;
+
             return fill >= MidBandFloor ? _midColor : _lowColor;
         }
     }

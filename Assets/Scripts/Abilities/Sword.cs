@@ -12,26 +12,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private Character _owner;
         private float _detachTimer;
 
-        /// <summary>CREATE phase — the pool's create function calls this.</summary>
         public Sword(SwordView view, InteractionResolver resolver)
         {
             _view = view;
             _resolver = resolver;
         }
 
-        // Root is the owning character — the top of the chain, not the sword itself.
         public IInteractionEntity Root => _owner;
-
-        /// <summary>Typed owner, so callers do not have to cast Root back to Character.</summary>
         public Character Owner => _owner;
 
         public SwordState State { get; private set; }
         public SwordView View => _view;
-
-        /// <summary>
-        /// Which ring owns it? When detached the RING must be called, not the counter,
-        /// otherwise SyncCount would return the wrong sword to the pool.
-        /// </summary>
         public SwordRingAbility Ring { get; private set; }
 
         public bool IsActive => State == SwordState.Active;
@@ -53,13 +44,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _view.Bind(this, _resolver);
         }
 
-        /// <summary>
-        /// Permanent cancel. The sword leaves the ring, is thrown, returns to the pool
-        /// when its timer elapses. The collider closes immediately → no more reports.
-        /// </summary>
         public void BeginDetach(Vector2 direction, FeedbackConfig config)
         {
-            if (State == SwordState.Detached) return;
+            if (State == SwordState.Detached)
+                return;
 
             State = SwordState.Detached;
             _detachTimer = config.SwordThrowDuration;
@@ -78,28 +66,18 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _detachTimer -= deltaTime;
         }
 
-        /// <summary>
-        /// Hard teleport (no sweep). Used the moment a sword is activated so it never
-        /// spends a frame at the pool origin, where Continuous detection would sweep it
-        /// across the map and clash it against every other freshly-spawned sword.
-        /// MovePosition would sweep from the previous position; setting Body.position does not.
-        /// </summary>
         public void SnapTo(Vector2 position, float angleRad)
         {
             _view.Body.position = position;
             _view.Body.rotation = angleRad * Mathf.Rad2Deg;
         }
 
-        // The position is already the exact target for this step — smoothing lives in
-        // the ring's polar offset/radius, not here. MovePosition on the interpolated
-        // kinematic body handles the visual glide between physics steps.
         public void MoveTo(Vector2 position, float angleRad)
         {
             _view.Body.MovePosition(position);
             _view.Body.MoveRotation(angleRad * Mathf.Rad2Deg);
         }
 
-        /// <summary>Visual entry pop-in — 0 grows to full size. Presentation only.</summary>
         public void SetScale(float scale) => _view.SetScale(scale);
 
         public void Deinitialize()

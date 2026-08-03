@@ -10,31 +10,27 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public float KnockbackForce;
         public float KnockbackStunDuration;
 
-        public int   SwordCount;
-        public int   MaxSwordCount;
+        public int SwordCount;
+        public int MaxSwordCount;
         public float OrbitRadius;
-        public float OrbitAngularSpeed;      // degrees / second
+        public float OrbitAngularSpeed;
         public float SwordDamage;
 
-        /// <summary>
-        /// INITIALIZE phase. Does NOT allocate a new object — overwrites the fields.
-        /// Required so retry produces no allocation.
-        /// </summary>
         public void ResetFrom(CharacterDefinition def)
         {
-            MoveSpeed    = def.MoveSpeed;
+            MoveSpeed = def.MoveSpeed;
             Acceleration = def.Acceleration;
             Deceleration = def.Deceleration;
-            MaxHealth    = def.MaxHealth;
+            MaxHealth = def.MaxHealth;
 
-            KnockbackForce        = def.KnockbackForce;
+            KnockbackForce = def.KnockbackForce;
             KnockbackStunDuration = def.KnockbackStunDuration;
 
-            SwordCount         = def.SwordCount;
-            MaxSwordCount      = def.MaxSwordCount;
-            OrbitRadius        = def.OrbitRadius;
-            OrbitAngularSpeed  = def.OrbitAngularSpeed;
-            SwordDamage        = def.SwordDamage;
+            SwordCount = def.SwordCount;
+            MaxSwordCount = def.MaxSwordCount;
+            OrbitRadius = def.OrbitRadius;
+            OrbitAngularSpeed = def.OrbitAngularSpeed;
+            SwordDamage = def.SwordDamage;
         }
     }
 }

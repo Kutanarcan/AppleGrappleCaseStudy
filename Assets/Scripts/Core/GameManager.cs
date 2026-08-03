@@ -23,8 +23,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [SerializeField] private FlagCatalog _flagCatalog;
 
         [Header("Scratch")]
-        [Tooltip("Any component implementing IScratchPainter — ScratchPainterBehaviour. " +
-                 "Untyped because that adapter lives outside this assembly. Optional.")]
         [SerializeField] private MonoBehaviour _scratchPainter;
 
         [Header("Arena")]
@@ -73,11 +71,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         private void OnDestroy()
         {
-            // Play mode is ending: Unity already destroyed the scene objects in its own
-            // order, so every reset below would reach through a dead reference. And there
-            // is nothing to clean up — the teardown exists to serve the ROSTER (do not
-            // respawn tinted red, half-drained, stunned), which has no next round here.
-            if (_quitting) return;
+            if (_quitting)
+                return;
 
             Deinitialize();
             Dispose();
@@ -89,7 +84,6 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             Initialize();
         }
 
-        // Every `new` line here can be handed over to a DI container.
         private void Compose()
         {
             DOTween.Init(recycleAllByDefault: false, useSafeMode: true, LogBehaviour.ErrorsOnly)
@@ -112,7 +106,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _particles = new ParticleManager(_feedbackConfig);
 
             Camera camera = _camera != null ? _camera : Camera.main;
-   
+
             _screenShake = new ScreenShakeEffect(camera != null ? camera.transform : null);
             _feedback = new GameFeedback(_audio, _particles, _screenShake, _feedbackConfig);
 
@@ -133,12 +127,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _identities = new IdentityPool(_flagCatalog);
 
-            // Optional: no painter just means no ground trail, the game still runs.
             _scratch = _scratchPainter as IScratchPainter;
-            if (_scratchPainter != null && _scratch == null)
-                Debug.LogWarning($"GameManager: {_scratchPainter.GetType().Name} does not " +
-                                 "implement IScratchPainter — the scratch trail is off.", this);
-
             _scratch ??= NullScratchPainter.Instance;
 
             _factory = new CharacterFactory(_characters, _map, _input, _swordPool, _resolver,
@@ -156,12 +145,12 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         public void Initialize()
         {
-            _map.Initialize(1 + _spawnConfig.EnemyCount);  
-            _props.Initialize();                
+            _map.Initialize(1 + _spawnConfig.EnemyCount);
+            _props.Initialize();
             _audio.Initialize();
             _particles.Initialize();
             _collectibles.Initialize();
-            _identities.Initialize();   
+            _identities.Initialize();
             _factory.Initialize();
         }
 
@@ -169,11 +158,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             _factory.Deinitialize();
             _identities.Deinitialize();
-            _collectibles.Deinitialize();  
+            _collectibles.Deinitialize();
             _props.Deinitialize();
-            _particles.Deinitialize();     
+            _particles.Deinitialize();
             _screenShake.Reset();
-            _scratch.ClearAll();            // R restarts the round — the ground starts blank
+            _scratch.ClearAll();
             _audio.Deinitialize();
             _characters.Deinitialize();
             _map.Deinitialize();
@@ -189,7 +178,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _particles?.Dispose();
             _swordPool?.Dispose();
             _resolver?.Dispose();
-            _arena?.Dispose();              
+            _arena?.Dispose();
 
             _input?.Disable();
             _input?.Dispose();
@@ -221,11 +210,14 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _collectibles.Update(dt);
 
             IReadOnlyList<Character> active = _characters.Active;
+
             for (int i = 0; i < active.Count; i++)
+            {
                 active[i].Update(dt);
+            }
 
 #if UNITY_EDITOR
-            if (Input.GetKeyDown(KeyCode.R)) Restart();   // reset demo
+            if (Input.GetKeyDown(KeyCode.R)) Restart();
 #endif
         }
 
@@ -235,7 +227,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             if (pending.Count == 0) return;
 
             for (int i = 0; i < pending.Count; i++)
-                _factory.Despawn(pending[i]);       // NOT Destroy — just deactivates
+            {
+                _factory.Despawn(pending[i]);
+            }
 
             _characters.ClearPending();
         }
@@ -245,8 +239,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             float dt = Time.fixedDeltaTime;
 
             IReadOnlyList<Character> active = _characters.Active;
+
             for (int i = 0; i < active.Count; i++)
+            {
                 active[i].FixedUpdate(dt);
+            }
         }
     }
 }
