@@ -715,29 +715,12 @@ MonoBehaviour:
   _camera: {fileID: 519420031}
   _flagCatalog: {fileID: 11400000, guid: 79203a85f180eec4c971f55e8015f721, type: 2}
   _arenaView: {fileID: 2054741028}
-  _arenaWidth: 50
-  _arenaHeight: 25
-  _wallThickness: 0.3
-  _arenaMarginOffset: 4
-  _minCharacterSeparation: 12
-  _characterMargin: 2
-  _randomMargin: 3
-  _spawnSeed: 12345
-  _enemyCount: 7
-  _collectibleSettings:
-    SpawnInterval: 0.2
-    MaxActive: 30
-    SwordAmount: 1
-  _collectiblePrewarm: 30
+  _arenaConfig: {fileID: 11400000, guid: 7a3e1c48b5d2409f8e6a1b7c2d4f5f01, type: 2}
+  _spawnConfig: {fileID: 11400000, guid: 7a3e1c48b5d2409f8e6a1b7c2d4f5f02, type: 2}
+  _collectibleConfig: {fileID: 11400000, guid: 7a3e1c48b5d2409f8e6a1b7c2d4f5f03, type: 2}
   _propPrefab: {fileID: 7976267290151082007, guid: 8dfeace415792e440b34977e03a33e31, type: 3}
-  _propSettings:
-    Sprites:
-    - {fileID: 21300000, guid: 2c9ed55866e48284f9a694f933142360, type: 3}
-    - {fileID: 21300000, guid: 09b1b0d79adc6c34bb80f0232731016c, type: 3}
-    - {fileID: 21300000, guid: 32d2b7c3dd7b57449b2e9eaea8f1b177, type: 3}
-    MinCount: 10
-    MaxCount: 50
-  _swordPrewarm: 48
+  _propConfig: {fileID: 11400000, guid: 7a3e1c48b5d2409f8e6a1b7c2d4f5f04, type: 2}
+  _swordPrewarm: 108
 --- !u!4 &1853262275
 Transform:
   m_ObjectHideFlags: 0

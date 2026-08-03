@@ -24,38 +24,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         [Header("Arena")]
         [SerializeField] private ArenaView _arenaView;
-        [SerializeField] private float _arenaWidth = 22f;
-        [SerializeField] private float _arenaHeight = 16f;
-        [SerializeField] private float _wallThickness = 0.5f;
-        [SerializeField] private float _arenaMarginOffset = 4f;
+        [SerializeField] private ArenaConfig _arenaConfig;
 
         [Header("Spawn")]
-        [SerializeField] private float _minCharacterSeparation = 3.5f;
-        [SerializeField] private float _characterMargin = 1.5f;
-        [SerializeField] private float _randomMargin = 1.5f;
-        [SerializeField] private int _spawnSeed = 12345;
-
-        [Header("Scene")]
-        [SerializeField] private int _enemyCount = 8;
+        [SerializeField] private SpawnConfig _spawnConfig;
 
         [Header("Collectibles")]
-        [SerializeField]
-        private SwordCollectibleSpawnSettings _collectibleSettings = new()
-        {
-            SpawnInterval = 3f,
-            MaxActive = 6,
-            SwordAmount = 1
-        };
-        [SerializeField] private int _collectiblePrewarm = 8;
+        [SerializeField] private CollectibleConfig _collectibleConfig;
 
         [Header("Props")]
         [SerializeField] private PropView _propPrefab;
-        [SerializeField]
-        private PropSpawnSettings _propSettings = new()
-        {
-            MinCount = 6,
-            MaxCount = 12
-        };
+        [SerializeField] private PropConfig _propConfig;
 
         [Header("Pooling")]
         [SerializeField] private int _swordPrewarm = 48;
@@ -88,14 +67,12 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             Dispose();
         }
 
-        /// <summary>Defeated → play again. Not a single Instantiate.</summary>
         public void Restart()
         {
             Deinitialize();
             Initialize();
         }
 
-        // ================= CREATE =================
         // Every `new` line here can be handed over to a DI container.
         private void Compose()
         {
@@ -104,10 +81,14 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _input = new PlayerInput();
 
-            // Arena first: ground/mask are sized, the fence is spawned, Min/Max become known
-            _arena = new Arena(_arenaView, _arenaWidth, _arenaHeight, _wallThickness, _arenaMarginOffset);
-            _map = new SpawnMap(_arena, _spawnSeed,
-                                       _minCharacterSeparation, _characterMargin, _randomMargin);
+            _arena = new Arena(_arenaView, _arenaConfig.Width, _arenaConfig.Height,
+                                          _arenaConfig.WallThickness, _arenaConfig.MarginOffset);
+
+            _map = new SpawnMap(_arena, _spawnConfig.Seed,
+                                       _spawnConfig.MinCharacterSeparation,
+                                       _spawnConfig.CharacterMargin,
+                                       _spawnConfig.RandomMargin);
+
             _characters = new CharacterRegistry();
             _resolver = new InteractionResolver();
 
@@ -115,9 +96,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _particles = new ParticleManager(_feedbackConfig);
 
             Camera camera = _camera != null ? _camera : Camera.main;
-            if (camera == null)
-                Debug.LogWarning("GameManager: no camera assigned — screen shake is disabled.");
-
+   
             _screenShake = new ScreenShakeEffect(camera != null ? camera.transform : null);
             _feedback = new GameFeedback(_audio, _particles, _screenShake, _feedbackConfig);
 
@@ -127,9 +106,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                 prewarm: _swordPrewarm);
 
             _collectibles = new SwordCollectibleSpawner(
-                _collectiblePrefab, _resolver, _map, _collectibleSettings, _collectiblePrewarm);
+                _collectiblePrefab, _resolver, _map,
+                _collectibleConfig.Settings, _collectibleConfig.Prewarm);
 
-            _props = new PropSpawner(_propPrefab, _map, _propSettings, _spawnSeed);
+            _props = new PropSpawner(_propPrefab, _map, _propConfig.Settings, _spawnConfig.Seed);
 
             _resolver.AddRule(new SwordPickupRule(_feedback, _feedbackConfig));
             _resolver.AddRule(new SwordVsSwordRule(_feedback));
@@ -139,7 +119,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _factory = new CharacterFactory(_characters, _map, _input, _swordPool, _resolver,
                                             _feedback, _feedbackConfig,
-                                            _playerDefinition, _enemyDefinition, _enemyCount, _collectibles, _arena,
+                                            _playerDefinition, _enemyDefinition, _spawnConfig.EnemyCount, _collectibles, _arena,
                                             _identities);
         }
 
@@ -150,46 +130,41 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             return new Sword(view, _resolver);
         }
 
-        // ================= INITIALIZE =================
         public void Initialize()
         {
-            _map.Initialize(1 + _enemyCount);      // player + enemies share one polygon
-            _props.Initialize();                   // scenery goes down before the actors
+            _map.Initialize(1 + _spawnConfig.EnemyCount);  
+            _props.Initialize();                
             _audio.Initialize();
             _particles.Initialize();
             _collectibles.Initialize();
-            _identities.Initialize();       // reshuffle before the factory deals identities
+            _identities.Initialize();   
             _factory.Initialize();
         }
 
-        // ================= DEINITIALIZE =================
         public void Deinitialize()
         {
             _factory.Deinitialize();
             _identities.Deinitialize();
-            _collectibles.Deinitialize();   // flying bubbles return to the pool at once
+            _collectibles.Deinitialize();  
             _props.Deinitialize();
-            _particles.Deinitialize();      // no blood splash left on screen
-            _screenShake.Reset();           // camera must not stay parked at a shake offset
+            _particles.Deinitialize();     
+            _screenShake.Reset();          
             _audio.Deinitialize();
             _characters.Deinitialize();
             _map.Deinitialize();
         }
 
-        // ================= DISPOSE =================
         private void Dispose()
         {
             DOTween.KillAll();
 
-            // Dispose order matters: the factory returns swords to the pool first,
-            // then the pool destroys them.
             _factory?.Dispose();
             _collectibles?.Dispose();
             _props?.Dispose();
             _particles?.Dispose();
             _swordPool?.Dispose();
             _resolver?.Dispose();
-            _arena?.Dispose();               // destroys the fence pieces
+            _arena?.Dispose();              
 
             _input?.Disable();
             _input?.Dispose();
@@ -210,11 +185,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _identities = null;
         }
 
-        // ================= TICK =================
         private void Update()
         {
-            // Deaths are triggered inside physics callbacks; we sweep after all of
-            // this frame's physics steps have finished.
             DespawnPending();
 
             float dt = Time.deltaTime;
