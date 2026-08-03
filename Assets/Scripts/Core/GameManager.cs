@@ -19,6 +19,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [SerializeField] private AudioSource _audioSource;
         [SerializeField] private Camera _camera;
 
+        [Header("Camera")]
+        [SerializeField] private Transform _cameraRig;
+        [SerializeField] private float _cameraSmoothTime = 0.2f;
+
         [Header("Identity")]
         [SerializeField] private FlagCatalog _flagCatalog;
 
@@ -57,6 +61,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private AudioManager _audio;
         private ParticleManager _particles;
         private ScreenShakeEffect _screenShake;
+        private CameraFollow _cameraFollow;
         private GameFeedback _feedback;
 
         private bool _quitting;
@@ -91,13 +96,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
             _input = new PlayerInput();
 
-            _arena = new Arena(_arenaView, _arenaConfig.Width, _arenaConfig.Height,
-                                          _arenaConfig.WallThickness, _arenaConfig.MarginOffset);
-
-            _map = new SpawnMap(_arena, _spawnConfig.Seed,
-                                       _spawnConfig.MinCharacterSeparation,
-                                       _spawnConfig.CharacterMargin,
-                                       _spawnConfig.RandomMargin);
+            _arena = new Arena(_arenaView, _arenaConfig.Width, _arenaConfig.Height, _arenaConfig.WallThickness, _arenaConfig.MarginOffset);
+            _map = new SpawnMap(_arena, _spawnConfig.Seed, _spawnConfig.MinCharacterSeparation, _spawnConfig.CharacterMargin, _spawnConfig.RandomMargin);
 
             _characters = new CharacterRegistry();
             _resolver = new InteractionResolver();
@@ -110,15 +110,14 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _screenShake = new ScreenShakeEffect(camera != null ? camera.transform : null);
             _feedback = new GameFeedback(_audio, _particles, _screenShake, _feedbackConfig);
 
+            _cameraFollow = new CameraFollow(_cameraRig, _cameraSmoothTime);
+
             _swordPool = new Pool<Sword>(
                 create: CreateSword,
                 destroy: sword => Destroy(sword.View.gameObject),
                 prewarm: _swordPrewarm);
 
-            _collectibles = new SwordCollectibleSpawner(
-                _collectiblePrefab, _resolver, _map,
-                _collectibleConfig.Settings, _collectibleConfig.Prewarm);
-
+            _collectibles = new SwordCollectibleSpawner(_collectiblePrefab, _resolver, _map, _collectibleConfig.Settings, _collectibleConfig.Prewarm);
             _props = new PropSpawner(_propPrefab, _map, _propConfig.Settings, _spawnConfig.Seed);
 
             _resolver.AddRule(new SwordPickupRule(_feedback, _feedbackConfig));
@@ -130,10 +129,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _scratch = _scratchPainter as IScratchPainter;
             _scratch ??= NullScratchPainter.Instance;
 
-            _factory = new CharacterFactory(_characters, _map, _input, _swordPool, _resolver,
-                                            _feedback, _feedbackConfig,
-                                            _playerDefinition, _enemyDefinition, _spawnConfig.EnemyCount, _collectibles, _arena,
-                                            _identities, _scratch);
+            _factory = new CharacterFactory(
+                _characters, _map, _input, _swordPool, _resolver, _feedback, _feedbackConfig, _playerDefinition,
+                _enemyDefinition, _spawnConfig.EnemyCount, _collectibles, _arena, _identities, _scratch);
         }
 
         private Sword CreateSword()
@@ -152,6 +150,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _collectibles.Initialize();
             _identities.Initialize();
             _factory.Initialize();
+
+            // After the factory: the player has to be placed before the camera snaps to it.
+            Character player = _factory.Player;
+            _cameraFollow.Initialize(player != null ? player.View.transform : null);
         }
 
         public void Deinitialize()
@@ -161,6 +163,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _collectibles.Deinitialize();
             _props.Deinitialize();
             _particles.Deinitialize();
+            _cameraFollow.Deinitialize();
             _screenShake.Reset();
             _scratch.ClearAll();
             _audio.Deinitialize();
@@ -187,6 +190,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _factory = null;
             _particles = null;
             _screenShake = null;
+            _cameraFollow = null;
             _scratch = null;
             _audio = null;
             _feedback = null;
@@ -198,6 +202,19 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _collectibles = null;
             _props = null;
             _identities = null;
+        }
+
+        private void DespawnPending()
+        {
+            IReadOnlyList<Character> pending = _characters.PendingRemoval;
+            if (pending.Count == 0) return;
+
+            for (int i = 0; i < pending.Count; i++)
+            {
+                _factory.Despawn(pending[i]);
+            }
+
+            _characters.ClearPending();
         }
 
         private void Update()
@@ -221,19 +238,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 #endif
         }
 
-        private void DespawnPending()
+        private void LateUpdate()
         {
-            IReadOnlyList<Character> pending = _characters.PendingRemoval;
-            if (pending.Count == 0) return;
-
-            for (int i = 0; i < pending.Count; i++)
-            {
-                _factory.Despawn(pending[i]);
-            }
-
-            _characters.ClearPending();
+            _cameraFollow.Update(Time.deltaTime);
         }
-
+     
         private void FixedUpdate()
         {
             float dt = Time.fixedDeltaTime;

@@ -15,8 +15,8 @@ MonoBehaviour:
   ViewPrefab: {fileID: 2193605570509476394, guid: 936707d04b68b6c49b82f4b215613f4c, type: 3}
   BrainType: 1
   HasSwordRing: 1
-  MoveSpeed: 7.5
-  Acceleration: 100
+  MoveSpeed: 6
+  Acceleration: 150
   Deceleration: 350
   MaxHealth: 100
   KnockbackForce: 6

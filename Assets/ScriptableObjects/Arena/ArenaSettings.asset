@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a3e1c48b5d2409f8e6a1b7c2d4f5e01, type: 3}
   m_Name: ArenaSettings
   m_EditorClassIdentifier: 
-  Width: 50
-  Height: 25
-  WallThickness: 0.3
+  Width: 60
+  Height: 30
+  WallThickness: 0.1
   MarginOffset: 4

@@ -28,6 +28,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         private Character _player;
 
+        public Character Player => _player;
+
         public CharacterFactory(CharacterRegistry registry, SpawnMap map,
                                 PlayerInput input, Pool<Sword> swordPool,
                                 InteractionResolver resolver,

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SpawnSettings
   m_EditorClassIdentifier: 
   EnemyCount: 4
-  MinCharacterSeparation: 12
-  CharacterMargin: 2
+  MinCharacterSeparation: 24
+  CharacterMargin: 1
   RandomMargin: 3
   Seed: 12345

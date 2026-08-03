@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a3e1c48b5d2409f8e6a1b7c2d4f5e03, type: 3}
   m_Name: CollectibleSettings
   m_EditorClassIdentifier: 
-  SpawnInterval: 0.5
-  MaxActive: 30
+  SpawnInterval: 0.45
+  MaxActive: 40
   SwordAmount: 1
-  Prewarm: 50
+  Prewarm: 40
