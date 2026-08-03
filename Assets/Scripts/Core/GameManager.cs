@@ -48,6 +48,15 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         };
         [SerializeField] private int _collectiblePrewarm = 8;
 
+        [Header("Props")]
+        [SerializeField] private PropView _propPrefab;
+        [SerializeField]
+        private PropSpawnSettings _propSettings = new()
+        {
+            MinCount = 6,
+            MaxCount = 12
+        };
+
         [Header("Pooling")]
         [SerializeField] private int _swordPrewarm = 48;
 
@@ -59,6 +68,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private Pool<Sword> _swordPool;
         private InteractionResolver _resolver;
         private SwordCollectibleSpawner _collectibles;
+        private PropSpawner _props;
         private IdentityPool _identities;
 
         private AudioManager _audio;
@@ -119,6 +129,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _collectibles = new SwordCollectibleSpawner(
                 _collectiblePrefab, _resolver, _map, _collectibleSettings, _collectiblePrewarm);
 
+            _props = new PropSpawner(_propPrefab, _map, _propSettings, _spawnSeed);
+
             _resolver.AddRule(new SwordPickupRule(_feedback, _feedbackConfig));
             _resolver.AddRule(new SwordVsSwordRule(_feedback));
             _resolver.AddRule(new SwordVsCharacterRule());
@@ -142,6 +154,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public void Initialize()
         {
             _map.Initialize(1 + _enemyCount);      // player + enemies share one polygon
+            _props.Initialize();                   // scenery goes down before the actors
             _audio.Initialize();
             _particles.Initialize();
             _collectibles.Initialize();
@@ -155,6 +168,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _factory.Deinitialize();
             _identities.Deinitialize();
             _collectibles.Deinitialize();   // flying bubbles return to the pool at once
+            _props.Deinitialize();
             _particles.Deinitialize();      // no blood splash left on screen
             _screenShake.Reset();           // camera must not stay parked at a shake offset
             _audio.Deinitialize();
@@ -171,6 +185,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             // then the pool destroys them.
             _factory?.Dispose();
             _collectibles?.Dispose();
+            _props?.Dispose();
             _particles?.Dispose();
             _swordPool?.Dispose();
             _resolver?.Dispose();
@@ -191,6 +206,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _map = null;
             _arena = null;
             _collectibles = null;
+            _props = null;
             _identities = null;
         }
 

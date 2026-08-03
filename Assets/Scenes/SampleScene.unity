@@ -729,6 +729,14 @@ MonoBehaviour:
     MaxActive: 30
     SwordAmount: 1
   _collectiblePrewarm: 30
+  _propPrefab: {fileID: 7976267290151082007, guid: 8dfeace415792e440b34977e03a33e31, type: 3}
+  _propSettings:
+    Sprites:
+    - {fileID: 21300000, guid: 2c9ed55866e48284f9a694f933142360, type: 3}
+    - {fileID: 21300000, guid: 09b1b0d79adc6c34bb80f0232731016c, type: 3}
+    - {fileID: 21300000, guid: 32d2b7c3dd7b57449b2e9eaea8f1b177, type: 3}
+    MinCount: 10
+    MaxCount: 50
   _swordPrewarm: 48
 --- !u!4 &1853262275
 Transform:
@@ -1163,7 +1171,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -50
+  m_SortingOrder: -51
   m_Sprite: {fileID: 21300000, guid: 4dead1260232e7a45ab30e897af25790, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
