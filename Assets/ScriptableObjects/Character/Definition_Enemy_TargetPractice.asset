@@ -10,28 +10,36 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c6e9da2301288fe43b6b62e77b6e6d59, type: 3}
-  m_Name: Player_Definition
+  m_Name: Definition_Enemy_TargetPractice
   m_EditorClassIdentifier: 
   ViewPrefab: {fileID: 2193605570509476394, guid: 936707d04b68b6c49b82f4b215613f4c, type: 3}
-  BrainType: 0
+  BrainType: 2
   HasSwordRing: 1
-  MoveSpeed: 6
-  Acceleration: 150
+  MoveSpeed: 7.5
+  Acceleration: 100
   Deceleration: 350
   MaxHealth: 100
   KnockbackForce: 6
   KnockbackStunDuration: 0.2
-  SwordCount: 3
+  SwordCount: 10
   MaxSwordCount: 36
   OrbitRadius: 2.25
   OrbitAngularSpeed: 150
   SwordDamage: 34
   RingSettleTime: 0.35
   RingEntryTime: 0.35
-  HitClip: {fileID: 8300000, guid: 0c1ac8bb22a2048498a5ee26f88863b2, type: 3}
+  HitClip: {fileID: 8300000, guid: 4bef9358b90270748a4dc65c0a8e8c38, type: 3}
   HitVolume: 0.9
   FlashColor: {r: 0.2783019, g: 1, b: 0.76509434, a: 1}
-  FlashDuration: 0.14
+  FlashDuration: 0.35
   HealthBarDrainTime: 0.25
-  ScratchBrushSize: 1.5
-  SwordScratchBrushSize: 0.75
+  ScratchBrushSize: 1
+  SwordScratchBrushSize: 1
+  PerceptionRadius: 10
+  DecisionInterval: 0.25
+  WanderDuration: 3
+  WallLookAhead: 4
+  BodyRadius: 0.5
+  GoalWeight: 1
+  CommitWeight: 0.35
+  WallWeight: 0.8
