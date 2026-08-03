@@ -12,10 +12,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         [SerializeField] private Animator       _animator;
         [SerializeField] private bool           _facesRightByDefault = true;
 
+        [Header("Overlay")]
+        [SerializeField] private HealthBarView    _healthBar;
+        [SerializeField] private CharacterTagView _tag;
+
         public Rigidbody2D    Body                => _body;
         public SpriteRenderer Sprite              => _sprite;
         public Animator       Animator            => _animator;
         public bool           FacesRightByDefault => _facesRightByDefault;
+
+        public HealthBarView    HealthBar => _healthBar;
+        public CharacterTagView Tag       => _tag;
 
         public void SetTint(Color color)
         {
@@ -24,8 +31,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         private void Reset()
         {
-            _body   = GetComponent<Rigidbody2D>();
-            _sprite = GetComponentInChildren<SpriteRenderer>();
+            _body      = GetComponent<Rigidbody2D>();
+            _sprite    = GetComponentInChildren<SpriteRenderer>();
+            _healthBar = GetComponentInChildren<HealthBarView>();
+            _tag       = GetComponentInChildren<CharacterTagView>();
         }
     }
 }

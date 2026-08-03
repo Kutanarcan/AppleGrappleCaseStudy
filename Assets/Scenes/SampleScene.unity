@@ -713,6 +713,7 @@ MonoBehaviour:
   _feedbackConfig: {fileID: 11400000, guid: 45fee817b50252c4abeec794edd4ebf6, type: 2}
   _audioSource: {fileID: 1863094907}
   _camera: {fileID: 519420031}
+  _flagCatalog: {fileID: 11400000, guid: 79203a85f180eec4c971f55e8015f721, type: 2}
   _arenaView: {fileID: 2054741028}
   _arenaWidth: 50
   _arenaHeight: 25

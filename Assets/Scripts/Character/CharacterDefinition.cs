@@ -53,6 +53,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         public Color FlashColor    = Color.red;
         public float FlashDuration = 0.14f;
 
+        [Tooltip("How long the health bar takes to slide to the new value. Long enough to " +
+                 "read the loss, short enough to finish before the next hit.")]
+        public float HealthBarDrainTime = 0.25f;
+
         [Header("AI")]
         public float PerceptionRadius = 10f;
         public float DecisionInterval = 0.25f;
@@ -69,6 +73,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         {
             MaxSwordCount        = Mathf.Max(MaxSwordCount, SwordCount);
             FlashDuration        = Mathf.Max(0.02f, FlashDuration);
+            HealthBarDrainTime   = Mathf.Max(0f, HealthBarDrainTime);
             KnockbackForce        = Mathf.Max(0f, KnockbackForce);
             KnockbackStunDuration = Mathf.Max(0f, KnockbackStunDuration);
             RingSettleTime       = Mathf.Max(0.01f, RingSettleTime);

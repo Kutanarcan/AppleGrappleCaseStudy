@@ -13,10 +13,12 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private readonly InteractionResolver _resolver;
         private readonly IGameFeedback       _feedback;
         private readonly FlashEffect         _flash;
+        private readonly HealthBarEffect     _healthBar;
 
         private IDirectionProvider _directionProvider;
         private float _health;
         private float _stunTimer;
+        private Sprite _flagSprite;
 
         /// <summary>Is it on the field? False for those waiting in the roster.</summary>
         public bool IsSpawned { get; private set; }
@@ -27,6 +29,11 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         /// <summary>Single place that answers "is this the one the human drives?".</summary>
         public bool IsPlayer => _definition.BrainType == CharacterBrainType.Player;
         public event Action<Character> Died;
+
+        /// <summary>Name + flag slot for this round. Set before Initialize, see SetIdentity.</summary>
+        public CharacterIdentity Identity { get; private set; }
+
+        public float HealthNormalized => Stats.MaxHealth > 0f ? _health / Stats.MaxHealth : 0f;
 
         public CharacterView       View       => _view;
         public CharacterDefinition Definition => _definition;
@@ -44,6 +51,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _resolver   = resolver;
             _feedback   = feedback;
             _flash      = new FlashEffect(view.Sprite);
+            _healthBar  = new HealthBarEffect(view.HealthBar);
 
             Stats     = new CharacterStats();
             Movement  = new MovementSimulator(view.Body, Stats);
@@ -55,6 +63,17 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         public void SetDirectionProvider(IDirectionProvider provider)
             => _directionProvider = provider ?? NullDirectionProvider.Instance;
+
+        /// <summary>
+        /// Called by the factory right before Initialize, every round — identity is dealt
+        /// per round, not per character, so a restart reshuffles names and flags.
+        /// The sprite is resolved by the caller: the index lives in logic, the asset does not.
+        /// </summary>
+        public void SetIdentity(in CharacterIdentity identity, Sprite flag)
+        {
+            Identity    = identity;
+            _flagSprite = flag;
+        }
 
         /// <summary>CREATE phase — an ability is attached once.</summary>
         public void AddAbility(IAbility ability) => _abilities.Add(ability);
@@ -75,6 +94,9 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _view.Body.rotation = 0f;
             _view.Bind(this, _resolver);
             _flash.Reset();
+            _healthBar.Reset();
+
+            if (_view.Tag != null) _view.Tag.Apply(Identity.Name, _flagSprite);
 
             Movement.Initialize();
             _directionProvider.Initialize();
@@ -121,6 +143,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _health = Mathf.Max(0f, _health - info.Amount);
 
             _flash.Play(_definition.FlashColor, _definition.FlashDuration);
+            _healthBar.Set(HealthNormalized, _definition.HealthBarDrainTime);
             _feedback.CharacterHit(this, info.Point);
             ApplyKnockback(info);
 
@@ -158,7 +181,10 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                 _abilities[i].Deinitialize();
 
             _flash.Reset();                                // do not stay tinted red
+            _healthBar.Reset();                            // ...and not respawn half-drained
             _stunTimer = 0f;
+
+            if (_view.Tag != null) _view.Tag.Clear();
             _directionProvider.Deinitialize();
             Movement.Deinitialize();
 

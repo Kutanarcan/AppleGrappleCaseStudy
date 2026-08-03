@@ -16,6 +16,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
         private readonly List<Character> _enemies = new(32);
         private readonly SwordCollectibleSpawner _collectibles;
         private readonly Arena _arena;
+        private readonly IdentityPool _identities;
         private Character _player;
 
         // ================= CREATE =================
@@ -25,7 +26,8 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
                                 InteractionResolver resolver,
                                 IGameFeedback feedback, FeedbackConfig feedbackConfig,
                                 CharacterDefinition playerDefinition,
-                                CharacterDefinition enemyDefinition, int enemyCount, SwordCollectibleSpawner collectibles, Arena arena)
+                                CharacterDefinition enemyDefinition, int enemyCount, SwordCollectibleSpawner collectibles, Arena arena,
+                                IdentityPool identities)
 
         {
             _registry = registry;
@@ -37,6 +39,7 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
             _feedbackConfig = feedbackConfig;
             _collectibles = collectibles;
             _arena = arena;
+            _identities = identities;
 
             _player = CreateCharacter(playerDefinition);
 
@@ -86,6 +89,12 @@ namespace LoopGamesCaseStudy.AppleGrappleClone
 
         private void Place(Character character, SpawnCategory category)
         {
+            // Identity before Initialize: that is where the tag reads it.
+            CharacterIdentity identity = category == SpawnCategory.Player
+                ? _identities.NextPlayer()
+                : _identities.NextEnemy();
+
+            character.SetIdentity(identity, _identities.Flag(identity.FlagIndex));
             character.Initialize(_map.Next(category));
             _registry.Add(character);
         }
